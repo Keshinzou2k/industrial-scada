@@ -1,0 +1,3137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industrial SCADA Monitoring Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --color-bg: #0a0e17;
+            --color-surface: #111827;
+            --color-card: #1a2236;
+            --color-border: #2d3748;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #94a3b8;
+            --color-primary: #3b82f6;
+            --color-primary-dark: #2563eb;
+            --color-success: #10b981;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'Roboto Mono', 'Monaco', monospace;
+            --space-xs: 0.25rem;
+            --space-sm: 0.5rem;
+            --space-md: 1rem;
+            --space-lg: 1.5rem;
+            --space-xl: 2rem;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ============================================ */
+        /* HEADER & NAVIGATION */
+        /* ============================================ */
+        header {
+            background-color: var(--color-surface);
+            border-bottom: 1px solid var(--color-border);
+            padding: var(--space-lg) var(--space-xl);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .header-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        .header-right {
+            display: flex;
+            gap: var(--space-lg);
+            align-items: center;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background-color: var(--color-card);
+            border-radius: 0.5rem;
+            border: 1px solid var(--color-border);
+        }
+
+        .status-indicator {
+            width: 0.75rem;
+            height: 0.75rem;
+            border-radius: 50%;
+            background-color: var(--color-success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        /* ============================================ */
+        /* SIDEBAR & MAIN LAYOUT */
+        /* ============================================ */
+        .container {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: var(--color-surface);
+            border-right: 1px solid var(--color-border);
+            padding: var(--space-lg) 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            padding: var(--space-md) 0;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .sidebar-title {
+            padding: var(--space-sm) var(--space-lg);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--color-text-secondary);
+            letter-spacing: 0.05em;
+        }
+
+        .sidebar-item {
+            padding: var(--space-md) var(--space-lg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+            color: var(--color-text-secondary);
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background-color: var(--color-card);
+            color: var(--color-primary);
+            border-left-color: var(--color-primary);
+        }
+
+        .sidebar-item.active {
+            color: var(--color-primary);
+            background-color: var(--color-card);
+            border-left-color: var(--color-primary);
+        }
+
+        /* ============================================ */
+        /* MAIN CONTENT */
+        /* ============================================ */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background-color: var(--color-bg);
+            padding: var(--space-xl);
+        }
+
+        .page-header {
+            margin-bottom: var(--space-xl);
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: var(--space-md);
+        }
+
+        .page-subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* ============================================ */
+        /* FILTERS & CONTROLS */
+        /* ============================================ */
+        .controls-bar {
+            display: flex;
+            gap: var(--space-md);
+            margin-bottom: var(--space-xl);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: var(--space-md);
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            color: var(--color-text);
+            font-family: var(--font-main);
+        }
+
+        .search-box input::placeholder {
+            color: var(--color-text-secondary);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filter-select {
+            padding: var(--space-md);
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            color: var(--color-text);
+            font-family: var(--font-main);
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .btn {
+            padding: var(--space-md) var(--space-lg);
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+        }
+
+        .btn:hover {
+            background-color: var(--color-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--color-card);
+            color: var(--color-text);
+            border: 1px solid var(--color-border);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--color-border);
+        }
+
+        /* ============================================ */
+        /* DASHBOARD GRID */
+        /* ============================================ */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .card {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            padding: var(--space-lg);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
+            transform: translateY(-4px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: var(--space-md);
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .card-icon {
+            color: var(--color-primary);
+            font-size: 1.25rem;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: var(--space-sm);
+            color: var(--color-text);
+        }
+
+        .card-subtitle {
+            color: var(--color-text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .card-badge {
+            display: inline-block;
+            padding: var(--space-xs) var(--space-sm);
+            background-color: rgba(16, 185, 129, 0.2);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            color: var(--color-success);
+            font-weight: 600;
+        }
+
+        /* ============================================ */
+        /* CHARTS */
+        /* ============================================ */
+        .chart-container {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            padding: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .chart-title {
+            font-weight: 600;
+            margin-bottom: var(--space-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        /* ============================================ */
+        /* TABLES */
+        /* ============================================ */
+        .table-container {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: var(--space-md);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        th {
+            background-color: var(--color-surface);
+            padding: var(--space-md) var(--space-lg);
+            text-align: left;
+            font-weight: 600;
+            color: var(--color-text-secondary);
+            border-bottom: 1px solid var(--color-border);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        td {
+            padding: var(--space-md) var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+            color: var(--color-text);
+        }
+
+        tr:hover {
+            background-color: var(--color-surface);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-row-highlight {
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        /* ============================================ */
+        /* TAGS & STATUS */
+        /* ============================================ */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-xs);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .tag-primary {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: var(--color-primary);
+        }
+
+        .tag-success {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--color-success);
+        }
+
+        .tag-warning {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: var(--color-warning);
+        }
+
+        .tag-danger {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--color-danger);
+        }
+
+        /* ============================================ */
+        /* MODALS */
+        /* ============================================ */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.75rem;
+            padding: var(--space-xl);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            padding-bottom: var(--space-lg);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--color-text);
+        }
+
+        .modal-body {
+            margin-bottom: var(--space-lg);
+        }
+
+        .modal-field {
+            margin-bottom: var(--space-lg);
+        }
+
+        .modal-field label {
+            display: block;
+            margin-bottom: var(--space-sm);
+            font-weight: 600;
+            color: var(--color-text-secondary);
+        }
+
+        .modal-field input,
+        .modal-field textarea {
+            width: 100%;
+            padding: var(--space-md);
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            color: var(--color-text);
+            font-family: var(--font-main);
+        }
+
+        .modal-field textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* ============================================ */
+        /* EMPTY STATE */
+        /* ============================================ */
+        .empty-state {
+            text-align: center;
+            padding: var(--space-xl);
+            color: var(--color-text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: var(--space-md);
+            opacity: 0.5;
+        }
+
+        /* ============================================ */
+        /* RESPONSIVE */
+        /* ============================================ */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--color-border);
+                padding: var(--space-md) 0;
+                display: none;
+            }
+
+            .sidebar.mobile-open {
+                display: block;
+            }
+
+            .main-content {
+                padding: var(--space-md);
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls-bar {
+                flex-direction: column;
+            }
+
+            .controls-bar > * {
+                width: 100%;
+            }
+
+            .page-title {
+                font-size: 1.5rem;
+            }
+
+            .card-value {
+                font-size: 1.75rem;
+            }
+        }
+
+        /* ============================================ */
+        /* SCROLLBAR STYLING */
+        /* ============================================ */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--color-surface);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--color-border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--color-text-secondary);
+        }
+
+        /* ============================================ */
+        /* ANALYTICS CONTROLS */
+        /* ============================================ */
+        .analytics-controls {
+            background-color: var(--color-card);
+            border: 2px solid var(--color-border);
+            border-left: 4px solid var(--color-warning);
+            border-radius: 0.75rem;
+            padding: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .date-range-section {
+            display: flex;
+            gap: var(--space-lg);
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .date-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .date-input-group label {
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .date-input {
+            padding: var(--space-md);
+            background-color: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            color: var(--color-text);
+            font-family: var(--font-main);
+            font-size: 0.95rem;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn-update {
+            background: linear-gradient(135deg, var(--color-warning) 0%, #d97706 100%);
+            color: #000;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-update:hover {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-update:active {
+            transform: translateY(0);
+        }
+
+        /* ============================================ */
+        /* AREA PERFORMANCE SECTION */
+        /* ============================================ */
+        .area-performance-section {
+            margin-bottom: var(--space-xl);
+        }
+
+        .area-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-lg);
+            margin-bottom: var(--space-xl);
+        }
+
+        .area-card {
+            background: linear-gradient(135deg, var(--color-card) 0%, var(--color-surface) 100%);
+            border: 2px solid var(--color-border);
+            border-left: 4px solid var(--color-primary);
+            border-radius: 0.75rem;
+            padding: var(--space-lg);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .area-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .area-card:hover {
+            border-color: var(--color-primary);
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
+            transform: translateY(-4px);
+        }
+
+        .area-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-lg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .area-card-title {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--color-text);
+        }
+
+        .machine-count-badge {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: var(--color-primary);
+            padding: var(--space-xs) var(--space-sm);
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .area-card-metric {
+            margin-bottom: var(--space-lg);
+            position: relative;
+            z-index: 1;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-xs);
+            font-weight: 600;
+        }
+
+        .metric-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .metric-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            font-family: var(--font-mono);
+        }
+
+        .metric-unit {
+            font-size: 0.85rem;
+            color: var(--color-text-secondary);
+            margin-left: var(--space-sm);
+        }
+
+        .utilization-gauge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--color-warning) 0deg,
+                var(--color-warning) calc(var(--utilization-value, 50) * 3.6deg),
+                var(--color-border) calc(var(--utilization-value, 50) * 3.6deg),
+                var(--color-border) 360deg
+            );
+            position: relative;
+            box-shadow: 0 0 0 3px var(--color-card), inset 0 0 0 3px var(--color-card);
+        }
+
+        .utilization-gauge::after {
+            content: attr(data-value);
+            position: absolute;
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            background-color: var(--color-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-warning);
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="header-left">
+            <div class="logo">
+                <i class="fas fa-industry"></i>
+                <span>SCADA</span>
+            </div>
+            <div class="header-title">Industrial Monitoring Dashboard</div>
+        </div>
+        <div class="header-right">
+            <div class="status-badge">
+                <div class="status-indicator"></div>
+                <span>System Online</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN LAYOUT -->
+    <div class="container">
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Navigation</div>
+                <div class="sidebar-item active" data-page="overview">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Overview</span>
+                </div>
+                <div class="sidebar-item" data-page="equipment">
+                    <i class="fas fa-cogs"></i>
+                    <span>Equipment</span>
+                </div>
+                <div class="sidebar-item" data-page="analytics">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analytics</span>
+                </div>
+            </div>
+            <div class="sidebar-section" id="sectionsNav"></div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content" id="mainContent">
+            <!-- Overview Page -->
+            <div id="page-overview" class="page">
+                <div class="page-header">
+                    <h1 class="page-title">System Overview</h1>
+                    <p class="page-subtitle">Real-time monitoring and analytics of your industrial systems</p>
+                </div>
+
+                <!-- Date Range & Update Button -->
+                <div class="analytics-controls">
+                    <div class="date-range-section">
+                        <div class="date-input-group">
+                            <label for="overviewFromDate">From Date</label>
+                            <input type="date" id="overviewFromDate" class="date-input">
+                        </div>
+                        <div class="date-input-group">
+                            <label for="overviewToDate">To Date</label>
+                            <input type="date" id="overviewToDate" class="date-input">
+                        </div>
+                        <button class="btn btn-update" id="overviewUpdateBtn">
+                            <i class="fas fa-sync-alt"></i> Update Analytics
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Area Performance Cards -->
+                <div class="area-performance-section">
+                    <h3 style="margin-bottom: var(--space-lg); font-size: 1.1rem;">Area Performance Metrics</h3>
+                    <div class="area-cards-grid" id="areaPerformanceCards"></div>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="dashboard-grid" id="kpiCards"></div>
+
+                <!-- Quick Filters -->
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="globalSearch" 
+                            placeholder="Search areas, equipment, models..."
+                        >
+                    </div>
+                    <select class="filter-select" id="vfdFilter">
+                        <option value="">All VFD Models</option>
+                    </select>
+                    <select class="filter-select" id="areaFilter">
+                        <option value="">All Areas</option>
+                    </select>
+                    <button class="btn btn-secondary" id="clearFilters">
+                        <i class="fas fa-redo"></i> Reset Filters
+                    </button>
+                </div>
+
+                <!-- Charts Section -->
+                <!-- Charts Row 1 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            Total Power Consumption Per Area (Daily)
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="powerConsumptionLineChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            Average Running Time Per Area (Daily)
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="runningTimeLineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Power Consumption Rate by Area
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="powerRateDonutChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Utilization Rate by Area
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="utilizationDonutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 3 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            VFD Distribution by Area
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="pieChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Unique Models per Area
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Equipment Page -->
+            <div id="page-equipment" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Equipment Management</h1>
+                    <p class="page-subtitle">Detailed view of all equipment and VFD systems</p>
+                </div>
+
+                <div class="controls-bar">
+                    <div class="search-box">
+                        <input 
+                            type="text" 
+                            id="equipmentSearch" 
+                            placeholder="Search by equipment ID, name, or model..."
+                        >
+                    </div>
+                    <select class="filter-select" id="equipmentAreaFilter">
+                        <option value="">All Areas</option>
+                    </select>
+                    <button class="btn" id="exportBtn">
+                        <i class="fas fa-download"></i> Export Data
+                    </button>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <i class="fas fa-list"></i>
+                        <span id="equipmentCount">0</span> Equipment Found
+                    </div>
+                    <table id="equipmentTable">
+                        <thead>
+                            <tr>
+                                <th>Equipment ID</th>
+                                <th>Name</th>
+                                <th>Power Rating</th>
+                                <th>Voltage</th>
+                                <th>VFD Model</th>
+                                <th>Area</th>
+                                <th>Running State</th>
+                                <th>Device Connection</th>
+                                <th>Fault Status</th>
+                                <th>Details</th>
+                            </tr>
+                        </thead>
+                        <tbody id="equipmentTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Analytics Page -->
+            <div id="page-analytics" class="page" style="display: none;">
+                <div class="page-header">
+                    <h1 class="page-title">Analytics & Reports</h1>
+                    <p class="page-subtitle">Comprehensive analysis of your SCADA system</p>
+                </div>
+
+                <!-- Date Range & Update Button -->
+                <div class="analytics-controls">
+                    <div class="date-range-section">
+                        <div class="date-input-group">
+                            <label for="analyticsFromDate">From Date</label>
+                            <input type="date" id="analyticsFromDate" class="date-input">
+                        </div>
+                        <div class="date-input-group">
+                            <label for="analyticsToDate">To Date</label>
+                            <input type="date" id="analyticsToDate" class="date-input">
+                        </div>
+                        <button class="btn btn-update" id="analyticsUpdateBtn">
+                            <i class="fas fa-sync-alt"></i> Update Analytics
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Area Performance Cards -->
+                <div class="area-performance-section">
+                    <h3 style="margin-bottom: var(--space-lg); font-size: 1.1rem;">Area Performance Metrics</h3>
+                    <div class="area-cards-grid" id="analyticsAreaPerformanceCards"></div>
+                </div>
+
+                <div class="dashboard-grid" id="analyticsCards"></div>
+
+                <!-- Charts Row 1 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            Total Power Consumption Per Area (Daily)
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="analyticsPowerConsumptionLineChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            Average Running Time Per Area (Daily)
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="analyticsRunningTimeLineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 2 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Power Consumption Rate by Area
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="analyticsPowerRateDonutChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-pie"></i>
+                            Utilization Rate by Area
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="analyticsUtilizationDonutChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row 3 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Power Rating Distribution by Area
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="powerChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <i class="fas fa-cube"></i>
+                        <span>VFD Model Summary</span>
+                    </div>
+                    <table id="modelSummaryTable">
+                        <thead>
+                            <tr>
+                                <th>VFD Model</th>
+                                <th>Count</th>
+                                <th>Areas</th>
+                                <th>Equipment IDs</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modelSummaryBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal" id="detailsModal">
+        <div class="modal-content" style="max-width: 900px; max-height: 95vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="detailsModalTitle">Equipment Details</h2>
+                <button class="modal-close" onclick="closeModal('detailsModal')">×</button>
+            </div>
+            <div class="modal-body" id="detailsModalBody"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // ============================================
+        // DATA MANAGEMENT
+        // ============================================
+        
+        class SCADADashboard {
+            constructor() {
+                this.data = null;
+                this.filteredData = null;
+                this.charts = {};
+                this.init();
+            }
+
+            /**
+             * Initialize the dashboard
+             */
+            async init() {
+                await this.loadData();
+                this.setupEventListeners();
+                this.renderSidebar();
+                this.initializeDateInputs();
+                this.loadPage('overview');
+            }
+
+            /**
+             * Load data from JSON file
+             */
+            async loadData() {
+                try {
+                    const response = await fetch('scada_data.json');
+                    this.data = await response.json();
+                    this.filteredData = JSON.parse(JSON.stringify(this.data));
+                    console.log('Data loaded successfully:', this.data);
+                } catch (error) {
+                    console.error('Error loading data:', error);
+                    showNotification('Error loading data', 'error');
+                }
+            }
+
+            /**
+             * Setup all event listeners
+             */
+            setupEventListeners() {
+                // Navigation
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const page = e.currentTarget.dataset.page;
+                        if (page) this.loadPage(page);
+                    });
+                });
+
+                // Global search
+                const globalSearch = document.getElementById('globalSearch');
+                if (globalSearch) {
+                    globalSearch.addEventListener('input', () => this.filterData());
+                }
+
+                // VFD filter
+                const vfdFilter = document.getElementById('vfdFilter');
+                if (vfdFilter) {
+                    vfdFilter.addEventListener('change', () => this.filterData());
+                }
+
+                // Area filter
+                const areaFilter = document.getElementById('areaFilter');
+                if (areaFilter) {
+                    areaFilter.addEventListener('change', () => this.filterData());
+                }
+
+                // Clear filters
+                const clearFilters = document.getElementById('clearFilters');
+                if (clearFilters) {
+                    clearFilters.addEventListener('click', () => this.clearFilters());
+                }
+
+                // Equipment search
+                const equipmentSearch = document.getElementById('equipmentSearch');
+                if (equipmentSearch) {
+                    equipmentSearch.addEventListener('input', () => this.filterEquipment());
+                }
+
+                // Equipment area filter
+                const equipmentAreaFilter = document.getElementById('equipmentAreaFilter');
+                if (equipmentAreaFilter) {
+                    equipmentAreaFilter.addEventListener('change', () => this.filterEquipment());
+                }
+
+                // Export button
+                const exportBtn = document.getElementById('exportBtn');
+                if (exportBtn) {
+                    exportBtn.addEventListener('click', () => this.exportData());
+                }
+
+                // Update Analytics buttons
+                const overviewUpdateBtn = document.getElementById('overviewUpdateBtn');
+                if (overviewUpdateBtn) {
+                    overviewUpdateBtn.addEventListener('click', () => this.updateAnalyticsOverview());
+                }
+
+                const analyticsUpdateBtn = document.getElementById('analyticsUpdateBtn');
+                if (analyticsUpdateBtn) {
+                    analyticsUpdateBtn.addEventListener('click', () => this.updateAnalyticsPage());
+                }
+            }
+
+            /**
+             * Initialize date inputs with default dates
+             */
+            initializeDateInputs() {
+                const today = new Date();
+                const oneMonthAgo = new Date(today.getTime() - (30 * 24 * 60 * 60 * 1000));
+
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+
+                const fromDateStr = formatDate(oneMonthAgo);
+                const toDateStr = formatDate(today);
+
+                // Set overview dates
+                const overviewFromDate = document.getElementById('overviewFromDate');
+                const overviewToDate = document.getElementById('overviewToDate');
+                if (overviewFromDate) overviewFromDate.value = fromDateStr;
+                if (overviewToDate) overviewToDate.value = toDateStr;
+
+                // Set analytics dates
+                const analyticsFromDate = document.getElementById('analyticsFromDate');
+                const analyticsToDate = document.getElementById('analyticsToDate');
+                if (analyticsFromDate) analyticsFromDate.value = fromDateStr;
+                if (analyticsToDate) analyticsToDate.value = toDateStr;
+            }
+
+            /**
+             * Render sidebar navigation
+             */
+            renderSidebar() {
+                const sectionsNav = document.getElementById('sectionsNav');
+                if (!sectionsNav || !this.data) return;
+
+                let html = '<div class="sidebar-title">Areas</div>';
+                this.data.sections.forEach(section => {
+                    html += `
+                        <div class="sidebar-item" data-page="section" data-section="${section.name}">
+                            <i class="fas fa-map-pin"></i>
+                            <span>${section.name}</span>
+                            <span style="margin-left: auto; font-size: 0.75rem; color: var(--color-text-secondary);">${section.total_vfds}</span>
+                        </div>
+                    `;
+                });
+                sectionsNav.innerHTML = html;
+
+                // Re-attach event listeners for section items
+                document.querySelectorAll('[data-page="section"]').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        this.loadSectionPage(e.currentTarget.dataset.section);
+                    });
+                });
+            }
+
+            /**
+             * Load a specific page
+             */
+            loadPage(pageName) {
+                // Hide all pages
+                document.querySelectorAll('.page').forEach(page => {
+                    page.style.display = 'none';
+                });
+
+                // Show selected page
+                const selectedPage = document.getElementById(`page-${pageName}`);
+                if (selectedPage) {
+                    selectedPage.style.display = 'block';
+                }
+
+                // Update sidebar active state
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[data-page="${pageName}"]`)?.classList.add('active');
+
+                // Render page content
+                if (pageName === 'overview') {
+                    this.renderOverview();
+                } else if (pageName === 'equipment') {
+                    this.populateFilters();
+                    this.renderEquipment();
+                } else if (pageName === 'analytics') {
+                    this.renderAnalytics();
+                }
+            }
+
+            /**
+             * Load a specific section page
+             */
+            loadSectionPage(sectionName) {
+                const section = this.data.sections.find(s => s.name === sectionName);
+                if (!section) return;
+
+                // Hide all pages
+                document.querySelectorAll('.page').forEach(page => {
+                    page.style.display = 'none';
+                });
+
+                // Create dynamic section page if not exists
+                let sectionPage = document.getElementById(`page-section-${this.sanitizeId(sectionName)}`);
+                if (!sectionPage) {
+                    sectionPage = document.createElement('div');
+                    sectionPage.id = `page-section-${this.sanitizeId(sectionName)}`;
+                    sectionPage.className = 'page';
+                    document.getElementById('mainContent').appendChild(sectionPage);
+                }
+
+                // Render section content
+                const today = new Date();
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+
+                let html = `
+                    <div class="page-header">
+                        <h1 class="page-title">${section.name}</h1>
+                        <p class="page-subtitle">${section.total_vfds} VFDs | ${section.unique_models} Unique Models | ${section.equipment.length} Equipment</p>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-cogs card-icon"></i>
+                                    Total VFDs
+                                </div>
+                            </div>
+                            <div class="card-value">${section.total_vfds}</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-cube card-icon"></i>
+                                    Unique Models
+                                </div>
+                            </div>
+                            <div class="card-value">${section.unique_models}</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="card-title">
+                                    <i class="fas fa-list card-icon"></i>
+                                    Equipment Count
+                                </div>
+                            </div>
+                            <div class="card-value">${section.equipment.length}</div>
+                        </div>
+                    </div>
+
+                    <div style="background-color: var(--color-card); border: 2px solid var(--color-border); border-left: 4px solid var(--color-warning); border-radius: 0.75rem; padding: var(--space-lg); margin-bottom: var(--space-xl);">
+                        <label style="font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; font-size: 0.75rem; display: block; margin-bottom: var(--space-md);">Select Date for Area History</label>
+                        <input type="date" id="areaHistoryDate-${this.sanitizeId(sectionName)}" class="date-input" value="${formatDate(today)}" style="width: 100%; max-width: 200px;">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <i class="fas fa-chart-line"></i>
+                                Running Time (Last 7 Days) - All Equipment
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="areaRunningTimeChart-${this.sanitizeId(sectionName)}"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="chart-container">
+                            <div class="chart-title">
+                                <i class="fas fa-chart-line"></i>
+                                Power Consumption (Last 7 Days) - All Equipment
+                            </div>
+                            <div class="chart-wrapper">
+                                <canvas id="areaPowerConsumptionChart-${this.sanitizeId(sectionName)}"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-line"></i>
+                            Daily Frequency History - All Equipment
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="areaFrequencyChart-${this.sanitizeId(sectionName)}"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <i class="fas fa-list"></i>
+                            <span>${section.equipment.length}</span> Equipment in ${section.name}
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Equipment ID</th>
+                                    <th>Name</th>
+                                    <th>Power Rating</th>
+                                    <th>Voltage</th>
+                                    <th>VFD Model</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${section.equipment.map(eq => `
+                                    <tr>
+                                        <td><strong>${eq.equipment_id}</strong></td>
+                                        <td>${eq.equipment_name}</td>
+                                        <td>${eq.power_rating || 'N/A'}</td>
+                                        <td>${eq.voltage || 'N/A'}</td>
+                                        <td><span class="tag tag-primary">${eq.vfd_brand_model}</span></td>
+                                        <td>
+                                            <button class="btn" style="padding: 0.5rem 1rem; background-color: var(--color-primary);" 
+                                                onclick="dashboard.showEquipmentDetails(${JSON.stringify(eq).replace(/"/g, '&quot;')}, '${section.name}')">
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                sectionPage.innerHTML = html;
+                sectionPage.style.display = 'block';
+
+                // Update sidebar active state
+                document.querySelectorAll('.sidebar-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[data-section="${sectionName}"]`)?.classList.add('active');
+
+                // Render charts after page is displayed
+                setTimeout(() => {
+                    this.renderAreaRunningTimeChart(section);
+                    this.renderAreaPowerConsumptionChart(section);
+                    this.renderAreaFrequencyChart(section);
+
+                    // Add date change listeners
+                    const dateInput = document.getElementById(`areaHistoryDate-${this.sanitizeId(sectionName)}`);
+                    if (dateInput) {
+                        dateInput.addEventListener('change', () => {
+                            this.renderAreaRunningTimeChart(section);
+                            this.renderAreaPowerConsumptionChart(section);
+                            this.renderAreaFrequencyChart(section);
+                        });
+                    }
+                }, 100);
+            }
+
+            /**
+             * Render area running time chart
+             */
+            renderAreaRunningTimeChart(section) {
+                const canvasId = `areaRunningTimeChart-${this.sanitizeId(section.name)}`;
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const datasets = [];
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+                section.equipment.forEach((eq, index) => {
+                    const dailyData = days.map(() => Math.round(Math.random() * 24));
+
+                    datasets.push({
+                        label: eq.equipment_id,
+                        data: dailyData,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '30',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false
+                    });
+                });
+
+                if (this.charts[canvasId]) this.charts[canvasId].destroy();
+
+                this.charts[canvasId] = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                },
+                                maxHeight: 100
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render area power consumption chart
+             */
+            renderAreaPowerConsumptionChart(section) {
+                const canvasId = `areaPowerConsumptionChart-${this.sanitizeId(section.name)}`;
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const datasets = [];
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+                section.equipment.forEach((eq, index) => {
+                    const power = parseFloat(eq.power_rating) || 10;
+                    const dailyData = days.map(() => (power * 24 * 0.746 * (0.7 + Math.random() * 0.3)).toFixed(1));
+
+                    datasets.push({
+                        label: eq.equipment_id,
+                        data: dailyData,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '30',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false
+                    });
+                });
+
+                if (this.charts[canvasId]) this.charts[canvasId].destroy();
+
+                this.charts[canvasId] = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                },
+                                maxHeight: 100
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render area frequency chart
+             */
+            renderAreaFrequencyChart(section) {
+                const canvasId = `areaFrequencyChart-${this.sanitizeId(section.name)}`;
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const datasets = [];
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+                section.equipment.forEach((eq, index) => {
+                    const dailyData = days.map(() => (45 + Math.random() * 15).toFixed(1));
+
+                    datasets.push({
+                        label: eq.equipment_id,
+                        data: dailyData,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '30',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false
+                    });
+                });
+
+                if (this.charts[canvasId]) this.charts[canvasId].destroy();
+
+                this.charts[canvasId] = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                },
+                                maxHeight: 100
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render overview page
+             */
+            renderOverview() {
+                this.renderAreaPerformance('areaPerformanceCards');
+                this.renderKPICards();
+                this.populateFilters();
+                this.renderCharts();
+            }
+
+            /**
+             * Render KPI cards
+             */
+            renderKPICards() {
+                const container = document.getElementById('kpiCards');
+                if (!container || !this.data) return;
+
+                const totalVFDs = this.data.sections.reduce((sum, s) => sum + s.total_vfds, 0);
+                const totalSections = this.data.sections.length;
+                const totalEquipment = this.data.sections.reduce((sum, s) => sum + s.equipment.length, 0);
+                const uniqueModels = new Set();
+                this.data.sections.forEach(s => {
+                    s.equipment.forEach(eq => {
+                        uniqueModels.add(eq.vfd_brand_model);
+                    });
+                });
+
+                container.innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-cogs card-icon"></i>
+                                Total VFDs
+                            </div>
+                            <span class="card-badge">Active</span>
+                        </div>
+                        <div class="card-value">${totalVFDs}</div>
+                        <div class="card-subtitle">Across all areas</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-map-pin card-icon"></i>
+                                Areas
+                            </div>
+                        </div>
+                        <div class="card-value">${totalSections}</div>
+                        <div class="card-subtitle">Operating sections</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-list card-icon"></i>
+                                Equipment
+                            </div>
+                        </div>
+                        <div class="card-value">${totalEquipment}</div>
+                        <div class="card-subtitle">All devices</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-cube card-icon"></i>
+                                VFD Models
+                            </div>
+                        </div>
+                        <div class="card-value">${uniqueModels.size}</div>
+                        <div class="card-subtitle">Unique brands</div>
+                    </div>
+                `;
+            }
+
+            /**
+             * Generate simulated area performance data
+             */
+            generateAreaPerformanceData() {
+                const performanceData = {};
+
+                this.data.sections.forEach(section => {
+                    const machineCount = section.equipment.length;
+                    const totalPower = section.equipment.reduce((sum, eq) => sum + (parseFloat(eq.power_rating) || 0), 0);
+
+                    // Simulate power consumption based on power rating
+                    // Formula: Power (kWh) = (Total Power HP * 24 hours * 0.746 kW/HP * efficiency factor)
+                    const basePowerConsumption = totalPower * 24 * 0.746;
+                    const variabilityFactor = 0.75 + Math.random() * 0.25; // 75-100% utilization
+                    const powerConsumption = (basePowerConsumption * variabilityFactor).toFixed(1);
+
+                    // Simulate running time (hours per month)
+                    const baseRunningTime = 30 * 24; // 720 hours per month
+                    const runningTimeVariability = 0.6 + Math.random() * 0.4; // 60-100%
+                    const runningTime = Math.round(baseRunningTime * runningTimeVariability);
+
+                    // Calculate utilization rate
+                    const utilizationRate = Math.round((runningTime / baseRunningTime) * 100);
+
+                    performanceData[section.name] = {
+                        powerConsumption,
+                        runningTime,
+                        utilizationRate,
+                        machineCount
+                    };
+                });
+
+                return performanceData;
+            }
+
+            /**
+             * Render area performance cards
+             */
+            renderAreaPerformance(containerId) {
+                const container = document.getElementById(containerId);
+                if (!container || !this.data) return;
+
+                const performanceData = this.generateAreaPerformanceData();
+
+                let html = '';
+                this.data.sections.forEach(section => {
+                    const data = performanceData[section.name];
+                    html += `
+                        <div class="area-card">
+                            <div class="area-card-header">
+                                <div class="area-card-title">${section.name}</div>
+                                <div class="machine-count-badge">
+                                    <i class="fas fa-cog"></i> ${data.machineCount}
+                                </div>
+                            </div>
+
+                            <div class="area-card-metric">
+                                <div class="metric-label">Power Consumption</div>
+                                <div class="metric-row">
+                                    <div>
+                                        <span class="metric-value">${data.powerConsumption.toLocaleString()}</span>
+                                        <span class="metric-unit">kWh</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="area-card-metric">
+                                <div class="metric-label">Running Time</div>
+                                <div class="metric-row">
+                                    <div>
+                                        <span class="metric-value">${data.runningTime}</span>
+                                        <span class="metric-unit">hrs.</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="area-card-metric">
+                                <div class="metric-label">Utilization Rate</div>
+                                <div class="metric-row">
+                                    <div></div>
+                                    <div class="utilization-gauge" data-value="${data.utilizationRate}%" style="--utilization-value: ${data.utilizationRate}"></div>
+                                </div>
+                            </div>
+
+                            <div class="area-card-metric" style="margin-bottom: 0;">
+                                <div class="metric-label">No. Of Machines</div>
+                                <div class="metric-value" style="font-size: 1.25rem;">${data.machineCount}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                container.innerHTML = html;
+            }
+
+            /**
+             * Update analytics for overview page
+             */
+            updateAnalyticsOverview() {
+                const fromDate = document.getElementById('overviewFromDate')?.value;
+                const toDate = document.getElementById('overviewToDate')?.value;
+
+                if (!fromDate || !toDate) {
+                    showNotification('Please select both dates', 'warning');
+                    return;
+                }
+
+                showNotification(`Analytics updated for ${fromDate} to ${toDate}`, 'success');
+                this.renderAreaPerformance('areaPerformanceCards');
+            }
+
+            /**
+             * Update analytics for analytics page
+             */
+            updateAnalyticsPage() {
+                const fromDate = document.getElementById('analyticsFromDate')?.value;
+                const toDate = document.getElementById('analyticsToDate')?.value;
+
+                if (!fromDate || !toDate) {
+                    showNotification('Please select both dates', 'warning');
+                    return;
+                }
+
+                showNotification(`Analytics updated for ${fromDate} to ${toDate}`, 'success');
+                this.renderAreaPerformance('analyticsAreaPerformanceCards');
+                this.renderAnalyticsCards();
+                this.renderModelSummary();
+            }
+
+            /**
+             * Populate filter dropdowns
+             */
+            populateFilters() {
+                if (!this.data) return;
+
+                // VFD Models filter
+                const vfdFilter = document.getElementById('vfdFilter');
+                if (vfdFilter) {
+                    const models = new Set();
+                    this.data.sections.forEach(s => {
+                        s.equipment.forEach(eq => {
+                            models.add(eq.vfd_brand_model);
+                        });
+                    });
+
+                    const options = '<option value="">All VFD Models</option>' +
+                        Array.from(models).sort().map(model => 
+                            `<option value="${model}">${model}</option>`
+                        ).join('');
+                    vfdFilter.innerHTML = options;
+                }
+
+                // Areas filter
+                const areaFilter = document.getElementById('areaFilter') || document.getElementById('equipmentAreaFilter');
+                if (areaFilter) {
+                    const options = '<option value="">All Areas</option>' +
+                        this.data.sections.map(s => 
+                            `<option value="${s.name}">${s.name}</option>`
+                        ).join('');
+                    
+                    document.getElementById('areaFilter').innerHTML = options;
+                    if (document.getElementById('equipmentAreaFilter')) {
+                        document.getElementById('equipmentAreaFilter').innerHTML = options;
+                    }
+                }
+            }
+
+            /**
+             * Render charts
+             */
+            renderCharts() {
+                if (!this.filteredData) return;
+
+                // Pie Chart - VFD Distribution
+                this.renderPieChart();
+
+                // Bar Chart - Unique Models
+                this.renderBarChart();
+
+                // Line Charts
+                this.renderPowerConsumptionLineChart('powerConsumptionLineChart');
+                this.renderRunningTimeLineChart('runningTimeLineChart');
+
+                // Donut Charts
+                this.renderPowerRateDonutChart('powerRateDonutChart');
+                this.renderUtilizationDonutChart('utilizationDonutChart');
+            }
+
+            /**
+             * Render pie chart
+             */
+            renderPieChart() {
+                const canvas = document.getElementById('pieChart');
+                if (!canvas) return;
+
+                const labels = this.filteredData.sections.map(s => s.name);
+                const data = this.filteredData.sections.map(s => s.total_vfds);
+                const colors = [
+                    '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
+                    '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'
+                ];
+
+                if (this.charts.pie) this.charts.pie.destroy();
+
+                this.charts.pie = new Chart(canvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels,
+                        datasets: [{
+                            data,
+                            backgroundColor: colors.slice(0, data.length),
+                            borderColor: '#1a2236',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render bar chart
+             */
+            renderBarChart() {
+                const canvas = document.getElementById('barChart');
+                if (!canvas) return;
+
+                const labels = this.filteredData.sections.map(s => s.name);
+                const data = this.filteredData.sections.map(s => s.unique_models);
+
+                if (this.charts.bar) this.charts.bar.destroy();
+
+                this.charts.bar = new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Unique Models',
+                            data,
+                            backgroundColor: '#3b82f6',
+                            borderColor: '#2563eb',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render power consumption line chart
+             */
+            renderPowerConsumptionLineChart(canvasId) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+
+                const isAnalytics = canvasId.includes('analytics');
+                const dataSource = isAnalytics ? this.data : this.filteredData;
+                
+                if (!dataSource) return;
+
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const datasets = [];
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+                dataSource.sections.forEach((section, index) => {
+                    const totalPower = section.equipment.reduce((sum, eq) => sum + (parseFloat(eq.power_rating) || 0), 0);
+                    // Simulate daily power consumption with slight variations
+                    const dailyData = days.map(() => {
+                        const base = totalPower * 24 * 0.746;
+                        const variation = (0.7 + Math.random() * 0.3);
+                        return (base * variation).toFixed(1);
+                    });
+
+                    datasets.push({
+                        label: section.name,
+                        data: dailyData,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '20',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false
+                    });
+                });
+
+                if (this.charts[canvasId]) this.charts[canvasId].destroy();
+
+                this.charts[canvasId] = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render running time line chart
+             */
+            renderRunningTimeLineChart(canvasId) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+
+                const isAnalytics = canvasId.includes('analytics');
+                const dataSource = isAnalytics ? this.data : this.filteredData;
+                
+                if (!dataSource) return;
+
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const datasets = [];
+                const colors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#14b8a6'];
+
+                dataSource.sections.forEach((section, index) => {
+                    // Simulate daily running time with variations
+                    const dailyData = days.map(() => {
+                        const baseHours = 20;
+                        const variation = (0.6 + Math.random() * 0.4);
+                        return Math.round(baseHours * variation);
+                    });
+
+                    datasets.push({
+                        label: section.name,
+                        data: dailyData,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '20',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false
+                    });
+                });
+
+                if (this.charts[canvasId]) this.charts[canvasId].destroy();
+
+                this.charts[canvasId] = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render power consumption rate donut chart
+             */
+            renderPowerRateDonutChart(canvasId) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+
+                const isAnalytics = canvasId.includes('analytics');
+                const dataSource = isAnalytics ? this.data : this.filteredData;
+                
+                if (!dataSource) return;
+
+                const labels = dataSource.sections.map(s => s.name);
+                const data = dataSource.sections.map(section => {
+                    return section.equipment.reduce((sum, eq) => sum + (parseFloat(eq.power_rating) || 0), 0);
+                });
+
+                const colors = [
+                    '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
+                    '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'
+                ];
+
+                if (this.charts[canvasId]) this.charts[canvasId].destroy();
+
+                this.charts[canvasId] = new Chart(canvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels.map((label, idx) => `${label} ${data[idx]} HP`),
+                        datasets: [{
+                            data,
+                            backgroundColor: colors.slice(0, data.length),
+                            borderColor: '#1a2236',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render utilization rate donut chart
+             */
+            renderUtilizationDonutChart(canvasId) {
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) return;
+
+                const isAnalytics = canvasId.includes('analytics');
+                const dataSource = isAnalytics ? this.data : this.filteredData;
+                
+                if (!dataSource) return;
+
+                const performanceData = this.generateAreaPerformanceData();
+
+                const labels = dataSource.sections.map(s => s.name);
+                const data = labels.map(label => performanceData[label].utilizationRate);
+
+                const colors = [
+                    '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
+                    '#8b5cf6', '#ec4899', '#14b8a6', '#f97316'
+                ];
+
+                if (this.charts[canvasId]) this.charts[canvasId].destroy();
+
+                this.charts[canvasId] = new Chart(canvas, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels.map((label, idx) => `${label} (${data[idx]}%)`),
+                        datasets: [{
+                            data,
+                            backgroundColor: colors.slice(0, data.length),
+                            borderColor: '#1a2236',
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Filter data based on search and filters
+             */
+            filterData() {
+                if (!this.data) return;
+
+                const searchTerm = document.getElementById('globalSearch')?.value.toLowerCase() || '';
+                const vfdModel = document.getElementById('vfdFilter')?.value || '';
+                const area = document.getElementById('areaFilter')?.value || '';
+
+                this.filteredData = JSON.parse(JSON.stringify(this.data));
+
+                this.filteredData.sections = this.filteredData.sections.filter(section => {
+                    if (area && section.name !== area) return false;
+                    return true;
+                });
+
+                this.filteredData.sections.forEach(section => {
+                    section.equipment = section.equipment.filter(eq => {
+                        const matchesSearch = !searchTerm || 
+                            eq.equipment_id.toLowerCase().includes(searchTerm) ||
+                            eq.equipment_name.toLowerCase().includes(searchTerm) ||
+                            eq.vfd_brand_model.toLowerCase().includes(searchTerm) ||
+                            section.name.toLowerCase().includes(searchTerm);
+
+                        const matchesVFD = !vfdModel || eq.vfd_brand_model === vfdModel;
+
+                        return matchesSearch && matchesVFD;
+                    });
+                });
+
+                // Recalculate totals
+                this.filteredData.sections = this.filteredData.sections.filter(s => s.equipment.length > 0);
+
+                this.renderCharts();
+            }
+
+            /**
+             * Clear all filters
+             */
+            clearFilters() {
+                document.getElementById('globalSearch').value = '';
+                document.getElementById('vfdFilter').value = '';
+                document.getElementById('areaFilter').value = '';
+                this.filteredData = JSON.parse(JSON.stringify(this.data));
+                this.renderCharts();
+                showNotification('Filters cleared', 'success');
+            }
+
+            /**
+             * Render equipment page
+             */
+            renderEquipment() {
+                if (!this.data) return;
+
+                const tbody = document.getElementById('equipmentTableBody');
+                const counter = document.getElementById('equipmentCount');
+
+                let count = 0;
+                let html = '';
+
+                this.data.sections.forEach(section => {
+                    section.equipment.forEach(eq => {
+                        count++;
+                        // Generate equipment status
+                        const isRunning = Math.random() > 0.3;
+                        const isConnected = Math.random() > 0.1;
+                        const hasFault = Math.random() > 0.85;
+
+                        html += `
+                            <tr>
+                                <td><strong>${eq.equipment_id}</strong></td>
+                                <td>${eq.equipment_name}</td>
+                                <td>${eq.power_rating || 'N/A'}</td>
+                                <td>${eq.voltage || 'N/A'}</td>
+                                <td><span class="tag tag-primary">${eq.vfd_brand_model}</span></td>
+                                <td><span class="tag tag-success">${section.name}</span></td>
+                                <td>
+                                    <span class="tag ${isRunning ? 'tag-success' : 'tag-warning'}">
+                                        <i class="fas ${isRunning ? 'fa-play-circle' : 'fa-pause-circle'}"></i>
+                                        ${isRunning ? 'Running' : 'Idle'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="tag ${isConnected ? 'tag-success' : 'tag-danger'}">
+                                        <i class="fas ${isConnected ? 'fa-link' : 'fa-unlink'}"></i>
+                                        ${isConnected ? 'Connected' : 'Offline'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="tag ${hasFault ? 'tag-danger' : 'tag-success'}">
+                                        <i class="fas ${hasFault ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                                        ${hasFault ? 'Fault' : 'Healthy'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn" style="padding: 0.5rem 1rem;" 
+                                        onclick="dashboard.showEquipmentDetails(${JSON.stringify(eq).replace(/"/g, '&quot;')}, '${section.name}')">
+                                        View
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                tbody.innerHTML = html || '<tr><td colspan="10" style="text-align: center; padding: 2rem;">No equipment found</td></tr>';
+                counter.textContent = count;
+            }
+
+            /**
+             * Filter equipment by search and area
+             */
+            filterEquipment() {
+                if (!this.data) return;
+
+                const searchTerm = document.getElementById('equipmentSearch')?.value.toLowerCase() || '';
+                const selectedArea = document.getElementById('equipmentAreaFilter')?.value || '';
+
+                const tbody = document.getElementById('equipmentTableBody');
+                const counter = document.getElementById('equipmentCount');
+
+                let count = 0;
+                let html = '';
+
+                this.data.sections.forEach(section => {
+                    if (selectedArea && section.name !== selectedArea) return;
+
+                    section.equipment.forEach(eq => {
+                        const matchesSearch = !searchTerm || 
+                            eq.equipment_id.toLowerCase().includes(searchTerm) ||
+                            eq.equipment_name.toLowerCase().includes(searchTerm) ||
+                            eq.vfd_brand_model.toLowerCase().includes(searchTerm);
+
+                        if (matchesSearch) {
+                            count++;
+                            // Generate equipment status
+                            const isRunning = Math.random() > 0.3;
+                            const isConnected = Math.random() > 0.1;
+                            const hasFault = Math.random() > 0.85;
+
+                            html += `
+                                <tr>
+                                    <td><strong>${eq.equipment_id}</strong></td>
+                                    <td>${eq.equipment_name}</td>
+                                    <td>${eq.power_rating || 'N/A'}</td>
+                                    <td>${eq.voltage || 'N/A'}</td>
+                                    <td><span class="tag tag-primary">${eq.vfd_brand_model}</span></td>
+                                    <td><span class="tag tag-success">${section.name}</span></td>
+                                    <td>
+                                        <span class="tag ${isRunning ? 'tag-success' : 'tag-warning'}">
+                                            <i class="fas ${isRunning ? 'fa-play-circle' : 'fa-pause-circle'}"></i>
+                                            ${isRunning ? 'Running' : 'Idle'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="tag ${isConnected ? 'tag-success' : 'tag-danger'}">
+                                            <i class="fas ${isConnected ? 'fa-link' : 'fa-unlink'}"></i>
+                                            ${isConnected ? 'Connected' : 'Offline'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="tag ${hasFault ? 'tag-danger' : 'tag-success'}">
+                                            <i class="fas ${hasFault ? 'fa-exclamation-triangle' : 'fa-check-circle'}"></i>
+                                            ${hasFault ? 'Fault' : 'Healthy'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn" style="padding: 0.5rem 1rem;" 
+                                            onclick="dashboard.showEquipmentDetails(${JSON.stringify(eq).replace(/"/g, '&quot;')}, '${section.name}')">
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    });
+                });
+
+                tbody.innerHTML = html || '<tr><td colspan="10" style="text-align: center; padding: 2rem;">No equipment found</td></tr>';
+                counter.textContent = count;
+            }
+
+            /**
+             * Generate live performance data for equipment
+             */
+            generateLivePerformanceData(equipment) {
+                const power = parseFloat(equipment.power_rating) || 10;
+                const voltage = parseFloat(equipment.voltage) || 380;
+
+                // Generate realistic live data based on equipment specifications
+                const referenceFrequency = (50 + (Math.random() * 2 - 1)).toFixed(2); // 50 ± 1 Hz
+                const outputFrequency = (45 + Math.random() * 10).toFixed(2); // 45-55 Hz
+                const outputCurrent = (power * 1.732 * 0.6 / voltage * (0.8 + Math.random() * 0.4)).toFixed(2); // A
+                const dcBusVoltage = (voltage * 1.45 + (Math.random() * 30 - 15)).toFixed(1); // DC voltage
+                const outputTorque = (power * 7.355 * (0.7 + Math.random() * 0.3)).toFixed(2); // N·m
+                const outputPower = (power * 0.746 * (0.7 + Math.random() * 0.3)).toFixed(2); // kW
+
+                return {
+                    referenceFrequency,
+                    outputFrequency,
+                    outputCurrent,
+                    dcBusVoltage,
+                    outputTorque,
+                    outputPower
+                };
+            }
+
+            /**
+             * Show equipment details in modal with charts
+             */
+            showEquipmentDetails(equipment, sectionName) {
+                const modal = document.getElementById('detailsModal');
+                const title = document.getElementById('detailsModalTitle');
+                const body = document.getElementById('detailsModalBody');
+
+                title.textContent = `${equipment.equipment_id} - ${equipment.equipment_name}`;
+
+                const today = new Date();
+                const formatDate = (date) => {
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                };
+
+                // Generate live performance data
+                const livePerformance = this.generateLivePerformanceData(equipment);
+
+                body.innerHTML = `
+                    <div style="margin-bottom: var(--space-xl); display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-lg);">
+                        <div>
+                            <div style="font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; font-size: 0.75rem; margin-bottom: var(--space-sm);">Equipment ID</div>
+                            <div style="color: var(--color-text);">${equipment.equipment_id}</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; font-size: 0.75rem; margin-bottom: var(--space-sm);">Power Rating</div>
+                            <div style="color: var(--color-text);">${equipment.power_rating || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; font-size: 0.75rem; margin-bottom: var(--space-sm);">Voltage</div>
+                            <div style="color: var(--color-text);">${equipment.voltage || 'N/A'}</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; font-size: 0.75rem; margin-bottom: var(--space-sm);">VFD Model</div>
+                            <div style="color: var(--color-text);">${equipment.vfd_brand_model}</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; font-size: 0.75rem; margin-bottom: var(--space-sm);">Location</div>
+                            <div style="color: var(--color-text);">${sectionName || equipment.vfd_location}</div>
+                        </div>
+                    </div>
+
+                    <div style="border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-lg); padding-bottom: var(--space-lg);">
+                        <div style="font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; font-size: 0.75rem; margin-bottom: var(--space-sm);">Details</div>
+                        <div style="color: var(--color-text);">${equipment.equipment_details}</div>
+                    </div>
+
+                    <div style="margin-bottom: var(--space-xl);">
+                        <h3 style="color: var(--color-text); margin-bottom: var(--space-lg); font-size: 1.1rem; display: flex; align-items: center; gap: var(--space-md);">
+                            <i class="fas fa-gauge" style="color: var(--color-success);"></i>
+                            Live Performance Data
+                        </h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                            <div style="background: linear-gradient(135deg, var(--color-card) 0%, var(--color-surface) 100%); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: var(--space-lg); text-align: center; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-sm); font-weight: 600;">Reference Frequency</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); font-family: var(--font-mono);">${livePerformance.referenceFrequency}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: var(--space-xs);">Hz</div>
+                            </div>
+                            <div style="background: linear-gradient(135deg, var(--color-card) 0%, var(--color-surface) 100%); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: var(--space-lg); text-align: center; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-sm); font-weight: 600;">Output Frequency</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); font-family: var(--font-mono);">${livePerformance.outputFrequency}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: var(--space-xs);">Hz</div>
+                            </div>
+                            <div style="background: linear-gradient(135deg, var(--color-card) 0%, var(--color-surface) 100%); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: var(--space-lg); text-align: center; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-sm); font-weight: 600;">Output Current</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); font-family: var(--font-mono);">${livePerformance.outputCurrent}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: var(--space-xs);">A</div>
+                            </div>
+                            <div style="background: linear-gradient(135deg, var(--color-card) 0%, var(--color-surface) 100%); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: var(--space-lg); text-align: center; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-sm); font-weight: 600;">DC Bus Voltage</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); font-family: var(--font-mono);">${livePerformance.dcBusVoltage}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: var(--space-xs);">V</div>
+                            </div>
+                            <div style="background: linear-gradient(135deg, var(--color-card) 0%, var(--color-surface) 100%); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: var(--space-lg); text-align: center; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-sm); font-weight: 600;">Output Torque</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); font-family: var(--font-mono);">${livePerformance.outputTorque}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: var(--space-xs);">N·m</div>
+                            </div>
+                            <div style="background: linear-gradient(135deg, var(--color-card) 0%, var(--color-surface) 100%); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: var(--space-lg); text-align: center; transition: all 0.3s ease;" onmouseover="this.style.borderColor='var(--color-primary)'" onmouseout="this.style.borderColor='var(--color-border)'">
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: var(--space-sm); font-weight: 600;">Output Power</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary); font-family: var(--font-mono);">${livePerformance.outputPower}</div>
+                                <div style="font-size: 0.75rem; color: var(--color-text-secondary); margin-top: var(--space-xs);">kW</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: var(--space-xl);">
+                        <h3 style="color: var(--color-text); margin-bottom: var(--space-lg); font-size: 1.1rem;">VFD History & Performance</h3>
+                        
+                        <div style="background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: 0.5rem; padding: var(--space-lg); margin-bottom: var(--space-xl);">
+                            <label style="font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; font-size: 0.75rem; display: block; margin-bottom: var(--space-md);">Select Date for VFD History</label>
+                            <input type="date" id="vfdHistoryDate" class="date-input" value="${formatDate(today)}" style="width: 100%; max-width: 200px;">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: var(--space-lg); margin-bottom: var(--space-xl);">
+                            <div style="background-color: var(--color-card); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: var(--space-lg);">
+                                <div style="font-weight: 600; margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-md);">
+                                    <i class="fas fa-chart-line" style="color: var(--color-primary);"></i>
+                                    Running Time (Last 7 Days)
+                                </div>
+                                <div style="position: relative; height: 250px;">
+                                    <canvas id="equipRunningTimeChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div style="background-color: var(--color-card); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: var(--space-lg);">
+                                <div style="font-weight: 600; margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-md);">
+                                    <i class="fas fa-chart-line" style="color: var(--color-primary);"></i>
+                                    Power Consumption (Last 7 Days)
+                                </div>
+                                <div style="position: relative; height: 250px;">
+                                    <canvas id="equipPowerConsumptionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: var(--space-lg);">
+                            <div style="background-color: var(--color-card); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: var(--space-lg);">
+                                <div style="font-weight: 600; margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-md);">
+                                    <i class="fas fa-chart-line" style="color: var(--color-primary);"></i>
+                                    Power Peak kWh (Daily - All Section Equipment)
+                                </div>
+                                <div style="position: relative; height: 250px;">
+                                    <canvas id="equipPowerPeakChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div style="background-color: var(--color-card); border: 1px solid var(--color-border); border-radius: 0.75rem; padding: var(--space-lg);">
+                                <div style="font-weight: 600; margin-bottom: var(--space-lg); display: flex; align-items: center; gap: var(--space-md);">
+                                    <i class="fas fa-chart-line" style="color: var(--color-primary);"></i>
+                                    Daily Frequency History
+                                </div>
+                                <div style="position: relative; height: 250px;">
+                                    <canvas id="equipFrequencyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                modal.classList.add('active');
+
+                // Render charts after modal is displayed
+                setTimeout(() => {
+                    this.renderEquipmentRunningTimeChart(equipment, sectionName);
+                    this.renderEquipmentPowerConsumptionChart(equipment, sectionName);
+                    this.renderEquipmentPowerPeakChart(equipment, sectionName);
+                    this.renderEquipmentFrequencyChart(equipment, sectionName);
+                }, 100);
+            }
+
+            /**
+             * Render equipment running time chart
+             */
+            renderEquipmentRunningTimeChart(equipment, sectionName) {
+                const canvas = document.getElementById('equipRunningTimeChart');
+                if (!canvas) return;
+
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const data = days.map(() => Math.round(Math.random() * 24));
+
+                if (this.charts.equipRunningTime) this.charts.equipRunningTime.destroy();
+
+                this.charts.equipRunningTime = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'Hours',
+                            data,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e2e8f0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render equipment power consumption chart
+             */
+            renderEquipmentPowerConsumptionChart(equipment, sectionName) {
+                const canvas = document.getElementById('equipPowerConsumptionChart');
+                if (!canvas) return;
+
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const power = parseFloat(equipment.power_rating) || 10;
+                const data = days.map(() => (power * 24 * 0.746 * (0.7 + Math.random() * 0.3)).toFixed(1));
+
+                if (this.charts.equipPowerConsumption) this.charts.equipPowerConsumption.destroy();
+
+                this.charts.equipPowerConsumption = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'kWh',
+                            data,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e2e8f0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render equipment power peak chart
+             */
+            renderEquipmentPowerPeakChart(equipment, sectionName) {
+                const canvas = document.getElementById('equipPowerPeakChart');
+                if (!canvas) return;
+
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const peakData = days.map(() => (Math.random() * 50 + 30).toFixed(1));
+
+                if (this.charts.equipPowerPeak) this.charts.equipPowerPeak.destroy();
+
+                this.charts.equipPowerPeak = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'kWh Peak',
+                            data: peakData,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e2e8f0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render equipment frequency chart
+             */
+            renderEquipmentFrequencyChart(equipment, sectionName) {
+                const canvas = document.getElementById('equipFrequencyChart');
+                if (!canvas) return;
+
+                const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                const frequencyData = days.map(() => (45 + Math.random() * 15).toFixed(1));
+
+                if (this.charts.equipFrequency) this.charts.equipFrequency.destroy();
+
+                this.charts.equipFrequency = new Chart(canvas, {
+                    type: 'line',
+                    data: {
+                        labels: days,
+                        datasets: [{
+                            label: 'Hz',
+                            data: frequencyData,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: { color: '#e2e8f0' }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render analytics page
+             */
+            renderAnalytics() {
+                this.renderAreaPerformance('analyticsAreaPerformanceCards');
+                this.renderAnalyticsCards();
+                this.renderPowerChart();
+                this.renderPowerConsumptionLineChart('analyticsPowerConsumptionLineChart');
+                this.renderRunningTimeLineChart('analyticsRunningTimeLineChart');
+                this.renderPowerRateDonutChart('analyticsPowerRateDonutChart');
+                this.renderUtilizationDonutChart('analyticsUtilizationDonutChart');
+                this.renderModelSummary();
+            }
+
+            /**
+             * Render analytics KPI cards
+             */
+            renderAnalyticsCards() {
+                const container = document.getElementById('analyticsCards');
+                if (!container || !this.data) return;
+
+                // Calculate stats
+                let maxPower = 0;
+                let totalPower = 0;
+                let gearWithVoltage = 0;
+                let gearTotal = 0;
+
+                const powerMap = {};
+
+                this.data.sections.forEach(section => {
+                    section.equipment.forEach(eq => {
+                        gearTotal++;
+                        if (eq.voltage) gearWithVoltage++;
+
+                        // Parse power rating
+                        let power = parseFloat(eq.power_rating) || 0;
+                        totalPower += power;
+                        maxPower = Math.max(maxPower, power);
+
+                        // Group by area for additional stats
+                        if (!powerMap[section.name]) {
+                            powerMap[section.name] = 0;
+                        }
+                        powerMap[section.name] += power;
+                    });
+                });
+
+                const avgPower = gearTotal > 0 ? (totalPower / gearTotal).toFixed(2) : 0;
+                const coverage = ((gearWithVoltage / gearTotal) * 100).toFixed(1);
+
+                container.innerHTML = `
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-bolt card-icon"></i>
+                                Total Power
+                            </div>
+                        </div>
+                        <div class="card-value">${totalPower.toFixed(0)} HP</div>
+                        <div class="card-subtitle">Across all equipment</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-chart-line card-icon"></i>
+                                Average Power
+                            </div>
+                        </div>
+                        <div class="card-value">${avgPower} HP</div>
+                        <div class="card-subtitle">Per equipment</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-arrow-up card-icon"></i>
+                                Peak Power
+                            </div>
+                        </div>
+                        <div class="card-value">${maxPower.toFixed(0)} HP</div>
+                        <div class="card-subtitle">Single equipment</div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">
+                                <i class="fas fa-percent card-icon"></i>
+                                Voltage Coverage
+                            </div>
+                        </div>
+                        <div class="card-value">${coverage}%</div>
+                        <div class="card-subtitle">${gearWithVoltage} of ${gearTotal} equipment</div>
+                    </div>
+                `;
+            }
+
+            /**
+             * Render power rating chart
+             */
+            renderPowerChart() {
+                const canvas = document.getElementById('powerChart');
+                if (!canvas || !this.data) return;
+
+                const labels = this.data.sections.map(s => s.name);
+                const data = this.data.sections.map(section => {
+                    return section.equipment.reduce((sum, eq) => {
+                        return sum + (parseFloat(eq.power_rating) || 0);
+                    }, 0);
+                });
+
+                if (this.charts.power) this.charts.power.destroy();
+
+                this.charts.power = new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Total Power (HP)',
+                            data,
+                            backgroundColor: '#10b981',
+                            borderColor: '#059669',
+                            borderWidth: 1,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#e2e8f0',
+                                    font: { family: "var(--font-main)" }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            },
+                            x: {
+                                ticks: { color: '#94a3b8' },
+                                grid: { color: '#2d3748' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * Render VFD model summary table
+             */
+            renderModelSummary() {
+                const tbody = document.getElementById('modelSummaryBody');
+                if (!tbody || !this.data) return;
+
+                const modelMap = {};
+
+                this.data.sections.forEach(section => {
+                    section.equipment.forEach(eq => {
+                        const model = eq.vfd_brand_model;
+                        if (!modelMap[model]) {
+                            modelMap[model] = {
+                                count: 0,
+                                areas: new Set(),
+                                ids: new Set()
+                            };
+                        }
+                        modelMap[model].count++;
+                        modelMap[model].areas.add(section.name);
+                        modelMap[model].ids.add(eq.equipment_id);
+                    });
+                });
+
+                let html = '';
+                Object.entries(modelMap).sort((a, b) => b[1].count - a[1].count).forEach(([model, data]) => {
+                    html += `
+                        <tr>
+                            <td><strong>${model}</strong></td>
+                            <td><span class="tag tag-primary">${data.count}</span></td>
+                            <td>${Array.from(data.areas).join(', ')}</td>
+                            <td style="font-size: 0.85rem; color: var(--color-text-secondary);">${Array.from(data.ids).join(', ')}</td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+            }
+
+            /**
+             * Export data to CSV
+             */
+            exportData() {
+                if (!this.data) return;
+
+                let csv = 'Equipment ID,Name,Power Rating,Voltage,VFD Model,Area,Details\n';
+
+                this.data.sections.forEach(section => {
+                    section.equipment.forEach(eq => {
+                        csv += `"${eq.equipment_id}","${eq.equipment_name}","${eq.power_rating || 'N/A'}","${eq.voltage || 'N/A'}","${eq.vfd_brand_model}","${section.name}","${eq.equipment_details}"\n`;
+                    });
+                });
+
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `scada_data_${new Date().toISOString().split('T')[0]}.csv`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+
+                showNotification('Data exported successfully', 'success');
+            }
+
+            /**
+             * Utility: Sanitize ID for HTML
+             */
+            sanitizeId(str) {
+                return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+            }
+        }
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+
+        /**
+         * Close modal
+         */
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        /**
+         * Show notification
+         */
+        function showNotification(message, type = 'info') {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+            // You can enhance this with a toast notification library if needed
+        }
+
+        /**
+         * Close modal when clicking outside
+         */
+        document.addEventListener('click', (e) => {
+            const modal = e.target.closest('.modal');
+            if (modal && e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+
+        // ============================================
+        // INITIALIZATION
+        // ============================================
+
+        const dashboard = new SCADADashboard();
+    </script>
+</body>
+</html>
