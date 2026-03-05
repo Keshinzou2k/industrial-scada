@@ -2,7 +2,7 @@
     "sections": [
         {
             "name": "SMALL BATCH AREA",
-            "total_vfds": 18,
+            "total_vfds": 19,
             "unique_models": 7,
             "equipment": [
                 {
@@ -166,6 +166,15 @@
                     "equipment_details": "10 HP Drive Motor w/ Frequency Inveter 3 HP Hydraulic",
                     "vfd_brand_model": "TDS V8",
                     "vfd_location": "SMALL BATCH AREA"
+                },
+                {
+                    "equipment_id": "TE-QC-2528",
+                    "equipment_name": "MIXER MACHINE",
+                    "power_rating": "2 HP",
+                    "voltage": "220VAC",
+                    "equipment_details": "",
+                    "vfd_brand_model": "TECO A510s",
+                    "vfd_location": "EE ROOM 1"
                 }
             ]
         },
@@ -403,7 +412,7 @@
         },
         {
             "name": "MILLING AREA",
-            "total_vfds": 8,
+            "total_vfds": 9,
             "unique_models": 5,
             "equipment": [
                 {
@@ -412,7 +421,7 @@
                     "power_rating": "30 HP",
                     "voltage": "220VAC",
                     "equipment_details": "20L Vessel Capacity 30HP W/Frequency Inverter",
-                    "vfd_brand_model": "TECO A510",
+                    "vfd_brand_model": "VACON",
                     "vfd_location": "EE ROOM 1"
                 },
                 {
@@ -422,6 +431,15 @@
                     "voltage": "220VAC",
                     "equipment_details": "20L Vessel Capacity 30HP W/Frequency Inverter",
                     "vfd_brand_model": "VACON 0100-300088+2+SRBT+DPAD",
+                    "vfd_location": "EE ROOM 1"
+                },
+                {
+                    "equipment_id": "PE-PS-314",
+                    "equipment_name": "MIGTHY MILL",
+                    "power_rating": "53 HP",
+                    "voltage": "220VAC",
+                    "equipment_details": "50HP INOUE-NISSIE",
+                    "vfd_brand_model": "YASKAWA A1000",
                     "vfd_location": "EE ROOM 1"
                 },
                 {
@@ -552,18 +570,18 @@
                     "equipment_id": "PE-PS-273",
                     "equipment_name": "MIXER MACHINE",
                     "power_rating": "33 HP",
-                    "voltage": "220VAC",
+                    "voltage": "440VAC",
                     "equipment_details": "30 HP Drive Motor w/ frequency Inverter 440V",
-                    "vfd_brand_model": "TECO A510s",
+                    "vfd_brand_model": "VACON",
                     "vfd_location": "NEW PLATFORM"
                 },
                 {
                     "equipment_id": "PE-PS-274",
                     "equipment_name": "MIXER MACHINE",
                     "power_rating": "33 HP",
-                    "voltage": "220VAC",
+                    "voltage": "440VAC",
                     "equipment_details": "30 HP DRIVE MOTOR",
-                    "vfd_brand_model": "TECO A510s",
+                    "vfd_brand_model": "TECO A510",
                     "vfd_location": "NEW PLATFORM"
                 },
                 {
@@ -646,16 +664,7 @@
                     "vfd_location": "EE ROOM 1"
                 },
                 {
-                    "equipment_id": "PE-PS-275-FR1",
-                    "equipment_name": "MIXER MACHINE",
-                    "power_rating": "33 HP",
-                    "voltage": "220VAC",
-                    "equipment_details": "200 HP drive motor w/ inverter 3HP hydraulic pump motor",
-                    "vfd_brand_model": "HITACHI SJ700",
-                    "vfd_location": "EE ROOM 2"
-                },
-                {
-                    "equipment_id": "PE-PS-275-FR2",
+                    "equipment_id": "PE-PS-275",
                     "equipment_name": "MIXER MACHINE",
                     "power_rating": "33 HP",
                     "voltage": "220VAC",
