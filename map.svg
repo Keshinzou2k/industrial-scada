@@ -5831,35 +5831,8 @@
 				</text>
 			<path class="machine-status-indicator online" d="m 0,0 -2.1825,5.3522 c -2.0324,0.4243 -3.9717,1.0704 -5.8202,1.8959 l -4.7181,-3.2294 -6.3901,4.5719 1.455,5.6758 c -1.2483,1.3882 -2.3534,2.901 -3.3102,4.512 l -5.5896,-0.012 -2.6434,7.3559 4.4622,3.8637 c -0.114,1.0281 -0.17,2.0735 -0.17,3.132 0,1.2913 0.097,2.5584 0.2666,3.8039 l -4.4741,3.564 2.6069,7.3681 5.9172,0.2281 c 1.0414,1.6564 2.248,3.2029 3.6012,4.608 l -1.5157,5.3521 6.4387,4.5001 4.923,-3.18 c 1.7619,0.7181 3.6113,1.2716 5.5291,1.632 l 2.0007,5.2681 7.8936,-0.1682 2.0006,-5.3398 c 2.0678,-0.4752 4.0477,-1.1607 5.9172,-2.052 l 4.6196,3.0479 6.3128,-4.7001 -1.5287,-5.5526 c 1.4103,-1.6386 2.6414,-3.4354 3.6497,-5.364 l 5.505,-0.2881 2.2432,-7.488 -4.6076,-3.5759 c 0.033,-0.5512 0.047,-1.1089 0.047,-1.6681 0,-1.4483 -0.1034,-2.8707 -0.3154,-4.26 l 4.3287,-3.564 -2.7161,-7.3197 -5.8201,-0.144 c -0.9701,-1.4976 -2.0797,-2.8992 -3.3097,-4.1894 l 1.5402,-5.316 -6.4142,-4.5358 -4.8986,3.144 c -1.6264,-0.6739 -3.3303,-1.2024 -5.0926,-1.572 l -1.8673,-5.3161 -7.8812,-0.048 z m -5.2613,9.3235 c 1.5187,0 2.7524,1.2209 2.7524,2.724 0,1.503 -1.2337,2.7119 -2.7524,2.7119 -1.5188,0 -2.7525,-1.2089 -2.7525,-2.7119 0,-1.5031 1.2337,-2.724 2.7525,-2.724 z m 27.1489,6.6009 c 1.5187,0 2.7524,1.2209 2.7524,2.724 0,1.503 -1.2337,2.7119 -2.7524,2.7119 -1.5189,0 -2.7404,-1.2089 -2.7404,-2.7119 0,-1.5031 1.2215,-2.724 2.7404,-2.724 z m -18.1153,3.8637 c 7.3915,0 13.3862,5.9209 13.3862,13.236 0,7.3151 -5.9947,13.2479 -13.3862,13.2479 -7.3916,0 -13.3864,-5.9328 -13.3864,-13.2479 0,-7.3151 5.9948,-13.236 13.3864,-13.236 z m -22.856,14.1599 c 1.5187,0 2.7524,1.2209 2.7524,2.724 0,1.5031 -1.2337,2.712 -2.7524,2.712 -1.5188,0 -2.7526,-1.2089 -2.7526,-2.712 0,-1.5031 1.2338,-2.724 2.7526,-2.724 z m 42.1104,8.6879 c 1.5188,0 2.7525,1.2209 2.7525,2.724 0,1.5031 -1.2337,2.724 -2.7525,2.724 -1.5187,0 -2.7402,-1.2209 -2.7402,-2.724 0,-1.5031 1.2215,-2.724 2.7402,-2.724 z m -24.0642,9.6614 c 1.5188,0 2.7525,1.2209 2.7525,2.724 0,1.503 -1.2337,2.7119 -2.7525,2.7119 -1.5188,0 -2.7403,-1.2089 -2.7403,-2.7119 0,-1.5031 1.2215,-2.724 2.7403,-2.724 z" fill="#4d4d4d" stroke="#000000" stroke-width="0.385997" transform="scale(0.35) translate(80, 80)"></path></g>
 		</g>
-		<g transform="translate(-1547.935,-535.77035)" class="vfd" id="vfd-275-FR1">
-			<g transform="translate(80.163703,-0.07555998)">
-				<rect style="fill:#999999;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" width="77.404724" height="77.404724" x="2335.7466" y="1209.3567"></rect>
-				<rect style="fill:#000000;stroke:#64748b;stroke-width:0.2" width="37.698658" height="77.404724" x="2355.5996" y="1209.3567"></rect>
-				<rect style="fill:#333333;stroke:#64748b;stroke-width:0.2" width="21.043728" height="21.943995" x="2363.927" y="1222.9733"></rect>
-				<text xml:space="preserve" style="font-size:5.33332px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" x="2362.9424" y="1220.0649">
-					<tspan sodipodi:role="line" style="font-size:5.33332px;fill:#ffffff;stroke-width:0.151181;stroke-dasharray:none" x="2362.9424" y="1220.0649">HITACHI</tspan>
-				</text>
-				<text xml:space="preserve" style="font-size:5.33332px;text-align:start;writing-mode:lr-tb;direction:ltr;text-anchor:start;fill:#ffffff;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" x="2364.6338" y="1259.8944">
-					<tspan sodipodi:role="line" style="font-size:5.33332px;fill:#ffffff;stroke-width:0.151181;stroke-dasharray:none" x="2364.6338" y="1259.8944">SJ7000</tspan>
-				</text>
-				<rect style="fill:#1a1a1a;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" width="15.304529" height="18.342928" x="2366.468" y="-1243.7173" transform="scale(1,-1)"></rect>
-				<ellipse style="fill:#ffffff;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" cx="2368.3855" cy="1237.6263" rx="1.2378662" ry="1.2562538"></ellipse>
-				<ellipse style="fill:#ffffff;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" cx="2372.4087" cy="1237.6263" rx="1.2378662" ry="1.2562538"></ellipse>
-				<ellipse style="fill:#00ff00;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" cx="2369.699" cy="1234.1154" rx="1.2378662" ry="1.2562538"></ellipse>
-				<ellipse style="fill:#ff0000;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" cx="2373.7222" cy="1234.1154" rx="1.2378662" ry="1.2562538"></ellipse>
-				<ellipse style="fill:#ffffff;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" cx="2375.9517" cy="1237.6263" rx="1.2378662" ry="1.2562538"></ellipse>
-				<ellipse style="fill:#ffffff;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" cx="2379.9749" cy="1237.6263" rx="1.2378662" ry="1.2562538"></ellipse>
-				<rect style="fill:#999999;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" width="11.762389" height="3.8261323" x="2368.2393" y="1226.9681"></rect>
-				<rect style="fill:#4d4d4d;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" width="77.404724" height="2.034693" x="2335.7466" y="1248.0591"></rect>
-			</g>
-			<g transform="translate(2416.7807,1271.1792)">
-				<rect style="fill:#ffffff;fill-opacity:1;stroke:#64748b;stroke-width:0.929195;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1" width="72.470802" height="11.770805" x="1.8645972" y="0.56459749" rx="1.9071265" ry="1.8108932"></rect>
-				<text xml:space="preserve" style="font-weight:900;font-size:13px;text-align:center;writing-mode:lr-tb;direction:ltr;text-anchor:middle;fill:#000000;fill-opacity:1;stroke-width:2;stroke-linecap:round;stroke-dasharray:none" x="38.099998" y="10.809375">
-					<tspan sodipodi:role="line" style="font-weight:900;font-size:12px;fill:#000000;stroke-width:5" x="38.099998" y="10.809375" class="label">      PE-PS-275</tspan>
-				</text>
-			<circle class="vfd-status-indicator online" cx="68" cy="-53"></circle></g>
-		</g>
-		<g transform="translate(-1468.968,-535.77035)" class="vfd" id="vfd-275-FR2">
+		
+		<g transform="translate(-1468.968,-535.77035)" class="vfd" id="vfd-275">
 			<g transform="translate(80.163703,-0.07555998)">
 				<rect style="fill:#999999;stroke:#64748b;stroke-width:0.151181;stroke-dasharray:none" width="77.404724" height="77.404724" x="2335.7466" y="1209.3567"></rect>
 				<rect style="fill:#000000;stroke:#64748b;stroke-width:0.2" width="37.698658" height="77.404724" x="2355.5996" y="1209.3567"></rect>
