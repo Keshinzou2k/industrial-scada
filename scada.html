@@ -1044,6 +1044,74 @@
             font-weight: 700;
             color: var(--color-warning);
         }
+
+        /* ============================================ */
+        /* TOOLTIP STYLES */
+        /* ============================================ */
+        .map-container {
+            position: relative;
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: var(--color-card);
+            border: 1px solid var(--color-border);
+            border-radius: 0.5rem;
+            padding: var(--space-md);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            max-width: 300px;
+            font-size: 0.85rem;
+        }
+
+        .tooltip.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            color: var(--color-text);
+            margin-bottom: var(--space-sm);
+            font-size: 0.9rem;
+        }
+
+        .tooltip-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-sm);
+        }
+
+        .tooltip-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .tooltip-label {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            margin-bottom: var(--space-xs);
+        }
+
+        .tooltip-value {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            font-family: var(--font-mono);
+        }
+
+        .tooltip-unit {
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            margin-left: var(--space-xs);
+        }
     </style>
 </head>
 <body>
@@ -1339,6 +1407,7 @@
             <div id="page-map" class="page" style="display: none;">
                 <div class="map-container">
                     <div id="svgContainer"></div>
+                    <div id="tooltip" class="tooltip"></div>
                 </div>
                 <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen">⛶</button>
             </div>
@@ -3491,8 +3560,15 @@
 
                         vfds.forEach(vfd => {
                             vfd.style.cursor = 'pointer';
-                            vfd.addEventListener('mouseenter', () => this.highlightPair(svg, vfd.id));
-                            vfd.addEventListener('mouseleave', () => this.unhighlightPair(svg, vfd.id));
+                            vfd.addEventListener('mouseenter', (e) => {
+                                this.highlightPair(svg, vfd.id);
+                                this.showVFDTooltip(e, vfd.id);
+                            });
+                            vfd.addEventListener('mouseleave', () => {
+                                this.unhighlightPair(svg, vfd.id);
+                                this.hideVFDTooltip();
+                            });
+                            vfd.addEventListener('mousemove', (e) => this.updateTooltipPosition(e));
                             vfd.addEventListener('click', () => this.showEquipmentModal(vfd.id));
                         });
 
@@ -3531,6 +3607,97 @@
                 const pair = svg.querySelector(`#${pairId}`);
                 if (element) element.style.filter = '';
                 if (pair) pair.style.filter = '';
+            }
+
+            /**
+             * Show tooltip with live VFD data
+             */
+            showVFDTooltip(event, vfdId) {
+                const eqId = vfdId.replace('vfd-', 'PE-PS-');
+                let equipment = null;
+                let area = '';
+                this.data.sections.forEach(section => {
+                    const eq = section.equipment.find(e => e.equipment_id === eqId);
+                    if (eq) {
+                        equipment = eq;
+                        area = section.name;
+                    }
+                });
+
+                if (!equipment) return;
+
+                const liveData = this.generateLivePerformanceData(equipment);
+                const tooltip = document.getElementById('tooltip');
+
+                tooltip.innerHTML = `
+                    <div class="tooltip-title">${equipment.equipment_id} - ${equipment.equipment_name}</div>
+                    <div class="tooltip-grid">
+                        <div class="tooltip-item">
+                            <div class="tooltip-label">Output Frequency</div>
+                            <div class="tooltip-value">${liveData.outputFrequency}<span class="tooltip-unit">Hz</span></div>
+                        </div>
+                        <div class="tooltip-item">
+                            <div class="tooltip-label">Output Current</div>
+                            <div class="tooltip-value">${liveData.outputCurrent}<span class="tooltip-unit">A</span></div>
+                        </div>
+                        <div class="tooltip-item">
+                            <div class="tooltip-label">DC Bus Voltage</div>
+                            <div class="tooltip-value">${liveData.dcBusVoltage}<span class="tooltip-unit">V</span></div>
+                        </div>
+                        <div class="tooltip-item">
+                            <div class="tooltip-label">Output Power</div>
+                            <div class="tooltip-value">${liveData.outputPower}<span class="tooltip-unit">kW</span></div>
+                        </div>
+                        <div class="tooltip-item">
+                            <div class="tooltip-label">Output Torque</div>
+                            <div class="tooltip-value">${liveData.outputTorque}<span class="tooltip-unit">N·m</span></div>
+                        </div>
+                        <div class="tooltip-item">
+                            <div class="tooltip-label">Reference Freq</div>
+                            <div class="tooltip-value">${liveData.referenceFrequency}<span class="tooltip-unit">Hz</span></div>
+                        </div>
+                    </div>
+                `;
+
+                this.updateTooltipPosition(event);
+                tooltip.classList.add('show');
+            }
+
+            /**
+             * Hide VFD tooltip
+             */
+            hideVFDTooltip() {
+                const tooltip = document.getElementById('tooltip');
+                tooltip.classList.remove('show');
+            }
+
+            /**
+             * Update tooltip position based on mouse event
+             */
+            updateTooltipPosition(event) {
+                const tooltip = document.getElementById('tooltip');
+                const mapContainer = document.querySelector('.map-container');
+
+                let x = event.clientX - mapContainer.offsetLeft + mapContainer.scrollLeft + 10;
+                let y = event.clientY - mapContainer.offsetTop + mapContainer.scrollTop + 10;
+
+                // Ensure tooltip stays within viewport bounds relative to map container
+                const tooltipRect = tooltip.getBoundingClientRect();
+                const containerRect = mapContainer.getBoundingClientRect();
+
+                if (x + tooltipRect.width > mapContainer.scrollLeft + containerRect.width) {
+                    x = event.clientX - mapContainer.offsetLeft + mapContainer.scrollLeft - tooltipRect.width - 10;
+                }
+                if (y + tooltipRect.height > mapContainer.scrollTop + containerRect.height) {
+                    y = event.clientY - mapContainer.offsetTop + mapContainer.scrollTop - tooltipRect.height - 10;
+                }
+
+                // Ensure tooltip doesn't go outside container bounds
+                x = Math.max(0, Math.min(x, mapContainer.scrollWidth - tooltipRect.width));
+                y = Math.max(0, Math.min(y, mapContainer.scrollHeight - tooltipRect.height));
+
+                tooltip.style.left = `${x}px`;
+                tooltip.style.top = `${y}px`;
             }
 
             /**
