@@ -293,6 +293,11 @@
             position: relative;
             transition: padding 0.2s ease;
         }
+        
+        .main-content.map-active {
+            padding: 0;
+            overflow: hidden;
+        }
 
         .page-header {
             margin-bottom: var(--space-lg);
@@ -543,7 +548,8 @@
 
         #svgContainer {
             width: 100%;
-            min-height: 100%;
+            min-height: calc(100vh - 70px);
+            height: 100%;
         }
 
         #svgContainer svg {
@@ -551,6 +557,7 @@
             width: 100%;
             height: auto;
             max-width: 100%;
+            min-height: 500px;
         }
 
         .fullscreen-btn {
@@ -937,9 +944,11 @@
         
         /* Map page needs specific height sizing */
         #page-map {
+            min-height: calc(100vh - 70px);
             height: 100%;
             padding: 0;
             overflow: hidden;
+            position: relative;
         }
 
         .page.fade-out {
@@ -2135,12 +2144,21 @@
                     });
 
                     const selectedPage = document.getElementById(`page-${pageName}`);
+                    const mainContent = document.getElementById('mainContent');
+                    
                     if (selectedPage) {
                         selectedPage.style.display = 'block';
                         // Trigger fade in animation (except for map)
                         if (pageName !== 'map') {
                             selectedPage.classList.remove('fade-out');
                             selectedPage.classList.add('fade-in');
+                        }
+                        
+                        // Remove padding from main-content when showing map
+                        if (pageName === 'map') {
+                            if (mainContent) mainContent.classList.add('map-active');
+                        } else {
+                            if (mainContent) mainContent.classList.remove('map-active');
                         }
                     }
 
@@ -4087,16 +4105,24 @@
                     </div>
                 `;
                 
-                fetch('map.svg')
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        return response.text();
-                    })
-                    .then(svgText => {
+                // Use XMLHttpRequest instead of fetch for better file:// protocol support
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', 'map.svg', true);
+                xhr.overrideMimeType('image/svg+xml');
+                
+                xhr.onload = () => {
+                    if (xhr.status === 200 || xhr.status === 0) { // 0 for file:// protocol
+                        const svgText = xhr.responseText;
+                        
                         if (!svgText || svgText.trim() === '') {
-                            throw new Error('Empty SVG file');
+                            container.innerHTML = `
+                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 400px; color: var(--color-text-secondary); text-align: center; padding: 2rem;">
+                                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-warning);"></i>
+                                    <h3 style="color: var(--color-text); margin-bottom: 0.5rem;">Empty SVG File</h3>
+                                    <p>The map.svg file appears to be empty.</p>
+                                </div>
+                            `;
+                            return;
                         }
                         
                         container.innerHTML = svgText;
@@ -4136,21 +4162,24 @@
                         });
                         
                         console.log('Map loaded successfully');
-                    })
-                    .catch(error => {
-                        console.error('Error loading SVG:', error);
-                        const container = document.getElementById('svgContainer');
-                        if (container) {
-                            container.innerHTML = `
-                                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 400px; color: var(--color-text-secondary); text-align: center; padding: 2rem;">
-                                    <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-warning);"></i>
-                                    <h3 style="color: var(--color-text); margin-bottom: 0.5rem;">Map Could Not Be Loaded</h3>
-                                    <p>Error: ${error.message}</p>
-                                    <p style="font-size: 0.875rem; margin-top: 1rem;">Please ensure map.svg is accessible in the root directory.</p>
-                                </div>
-                            `;
-                        }
-                    });
+                    } else {
+                        throw new Error(`Failed to load map.svg (status: ${xhr.status})`);
+                    }
+                };
+                
+                xhr.onerror = () => {
+                    console.error('Error loading SVG via XMLHttpRequest');
+                    container.innerHTML = `
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 400px; color: var(--color-text-secondary); text-align: center; padding: 2rem;">
+                            <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: 1rem; color: var(--color-warning);"></i>
+                            <h3 style="color: var(--color-text); margin-bottom: 0.5rem;">Map Could Not Be Loaded</h3>
+                            <p>Error loading map.svg</p>
+                            <p style="font-size: 0.875rem; margin-top: 1rem;">Please ensure map.svg is in the same directory as scada.html</p>
+                        </div>
+                    `;
+                };
+                
+                xhr.send();
             }
 
             /**
