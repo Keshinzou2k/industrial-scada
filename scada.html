@@ -4055,9 +4055,6 @@
                             machine.addEventListener('mouseleave', () => this.unhighlightPair(svg, machine.id));
                             machine.addEventListener('click', () => this.showEquipmentModal(machine.id));
                         });
-
-                        // Initialize toggle button states
-                        this.updateToggleButtons();
                     })
                     .catch(error => console.error('Error loading SVG:', error));
             }
