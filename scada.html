@@ -440,6 +440,39 @@
             height: 180px;
         }
 
+        /* map page container */
+        .map-container {
+            position: absolute;
+            top: -var(--space-md);
+            left: -var(--space-md);
+            width: calc(100% + 2*var(--space-md));
+            height: calc(100% + 2*var(--space-md));
+            overflow: auto;
+            background-color: var(--color-bg);
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .fullscreen-btn:hover {
+            background-color: var(--color-primary-dark);
+            transform: scale(1.1);
+        }
+
         /* ============================================ */
         /* TABLES */
         /* ============================================ */
@@ -735,7 +768,13 @@
             flex-wrap: wrap;
         }
 
-        .date-input-group {\n            display: flex;\n            flex-direction: column;\n            gap: var(--space-xs);\n            flex: 0 1 auto;\n            min-width: 100px;\n        }
+        .date-input-group {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-xs);
+            flex: 0 1 auto;
+            min-width: 100px;
+        }
 
         .date-input-group label {
             font-weight: 600;
@@ -1039,9 +1078,9 @@
                     <i class="fas fa-cogs"></i>
                     <span>Equipment</span>
                 </div>
-                <div class="sidebar-item" data-page="analytics">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>Analytics</span>
+                <div class="sidebar-item" data-page="map">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Map</span>
                 </div>
             </div>
             <div class="sidebar-section" id="sectionsNav"></div>
@@ -1159,6 +1198,55 @@
                     </div>
                 </div>
 
+                <!-- Charts Row 3 -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-lg);">
+                    <div class="chart-container">
+                        <div class="chart-title">
+                            <i class="fas fa-chart-bar"></i>
+                            Power Rating Distribution by Area
+                        </div>
+                        <div class="chart-wrapper">
+                            <canvas id="powerChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <i class="fas fa-cube"></i>
+                        <span>VFD Model Summary</span>
+                    </div>
+                    <table id="modelSummaryTable">
+                        <thead>
+                            <tr>
+                                <th>VFD Model</th>
+                                <th>Count</th>
+                                <th>Areas</th>
+                                <th>Equipment IDs</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modelSummaryBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="table-container">
+                    <div class="table-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Faults and Alarms</span>
+                    </div>
+                    <table id="faultsTable">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Equipment ID</th>
+                                <th>Area</th>
+                                <th>Fault Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="faultsTableBody"></tbody>
+                    </table>
+                </div>
+
             </div>
 
             <!-- Equipment Page -->
@@ -1241,82 +1329,18 @@
                     <div class="area-cards-grid" id="analyticsAreaPerformanceCards"></div>
                 </div>
 
-                <!-- Charts Row 1 -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-lg);">
-                    <div class="chart-container">
-                        <div class="chart-title">
-                            <i class="fas fa-chart-line"></i>
-                            Total Power Consumption Per Area (Daily)
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="analyticsPowerConsumptionLineChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-container">
-                        <div class="chart-title">
-                            <i class="fas fa-chart-line"></i>
-                            Average Running Time Per Area (Daily)
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="analyticsRunningTimeLineChart"></canvas>
-                        </div>
-                    </div>
+                <div style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>All charts and reports have been moved to the Overview page for better monitoring.</p>
                 </div>
+            </div>
 
-                <!-- Charts Row 2 -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-lg);">
-                    <div class="chart-container">
-                        <div class="chart-title">
-                            <i class="fas fa-chart-pie"></i>
-                            Power Consumption Rate by Area
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="analyticsPowerRateDonutChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-container">
-                        <div class="chart-title">
-                            <i class="fas fa-chart-pie"></i>
-                            Utilization Rate by Area
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="analyticsUtilizationDonutChart"></canvas>
-                        </div>
-                    </div>
+            <!-- Map Page -->
+            <div id="page-map" class="page" style="display: none;">
+                <div class="map-container">
+                    <div id="svgContainer"></div>
                 </div>
-
-                <!-- Charts Row 3 -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-md); margin-bottom: var(--space-lg);">
-                    <div class="chart-container">
-                        <div class="chart-title">
-                            <i class="fas fa-chart-bar"></i>
-                            Power Rating Distribution by Area
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="powerChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <div class="table-header">
-                        <i class="fas fa-cube"></i>
-                        <span>VFD Model Summary</span>
-                    </div>
-                    <table id="modelSummaryTable">
-                        <thead>
-                            <tr>
-                                <th>VFD Model</th>
-                                <th>Count</th>
-                                <th>Areas</th>
-                                <th>Equipment IDs</th>
-                            </tr>
-                        </thead>
-                        <tbody id="modelSummaryBody"></tbody>
-                    </table>
-                </div>
+                <button class="fullscreen-btn" id="fullscreenBtn" title="Toggle Fullscreen">⛶</button>
             </div>
         </main>
     </div>
@@ -1432,9 +1456,17 @@
                     overviewUpdateBtn.addEventListener('click', () => this.updateAnalyticsOverview());
                 }
 
-                const analyticsUpdateBtn = document.getElementById('analyticsUpdateBtn');
-                if (analyticsUpdateBtn) {
-                    analyticsUpdateBtn.addEventListener('click', () => this.updateAnalyticsPage());
+                // Fullscreen button
+                const fullscreenBtn = document.getElementById('fullscreenBtn');
+                if (fullscreenBtn) {
+                    fullscreenBtn.addEventListener('click', () => {
+                        const container = document.querySelector('.map-container');
+                        if (document.fullscreenElement) {
+                            document.exitFullscreen();
+                        } else {
+                            container.requestFullscreen().catch(err => console.error(err));
+                        }
+                    });
                 }
 
                 this.setupSidebarTrigger();
@@ -1559,11 +1591,8 @@
                 // Render page content
                 if (pageName === 'overview') {
                     this.renderOverview();
-                } else if (pageName === 'equipment') {
-                    this.populateFilters();
-                    this.renderEquipment();
-                } else if (pageName === 'analytics') {
-                    this.renderAnalytics();
+                } else if (pageName === 'map') {
+                    this.renderMap();
                 }
             }
 
@@ -1705,6 +1734,23 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <div class="table-container">
+                        <div class="table-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Faults and Alarms - ${section.name}</span>
+                        </div>
+                        <table id="sectionFaultsTable-${this.sanitizeId(sectionName)}">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Equipment ID</th>
+                                    <th>Fault Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sectionFaultsTableBody-${this.sanitizeId(sectionName)}"></tbody>
+                        </table>
+                    </div>
                 `;
 
                 sectionPage.innerHTML = html;
@@ -1721,6 +1767,7 @@
                     this.renderAreaRunningTimeChart(section);
                     this.renderAreaPowerConsumptionChart(section);
                     this.renderAreaFrequencyChart(section);
+                    this.renderSectionFaults(section);
 
                     // Add date change listeners
                     const dateInput = document.getElementById(`areaHistoryDate-${this.sanitizeId(sectionName)}`);
@@ -1924,6 +1971,9 @@
                 this.renderKPICards();
                 this.populateFilters();
                 this.renderCharts();
+                this.renderPowerChart();
+                this.renderModelSummary();
+                this.renderFaults();
             }
 
             /**
@@ -3127,12 +3177,7 @@
             renderAnalytics() {
                 this.renderAreaPerformance('analyticsAreaPerformanceCards');
                 this.renderAnalyticsCards();
-                this.renderPowerChart();
-                this.renderPowerConsumptionLineChart('analyticsPowerConsumptionLineChart');
-                this.renderRunningTimeLineChart('analyticsRunningTimeLineChart');
-                this.renderPowerRateDonutChart('analyticsPowerRateDonutChart');
-                this.renderUtilizationDonutChart('analyticsUtilizationDonutChart');
-                this.renderModelSummary();
+                // Charts and reports moved to Overview page
             }
 
             /**
@@ -3314,6 +3359,201 @@
             }
 
             /**
+             * Render faults and alarms table
+             */
+            renderFaults() {
+                const tbody = document.getElementById('faultsTableBody');
+                if (!tbody || !this.data) return;
+
+                // Simulated faults data
+                const faults = [
+                    {
+                        time: '2026-03-09 14:30:00',
+                        equipmentId: 'PE-PS-241',
+                        area: 'SMALL BATCH AREA',
+                        faultType: 'Overcurrent',
+                        severity: 'High',
+                        status: 'Active'
+                    },
+                    {
+                        time: '2026-03-09 13:15:00',
+                        equipmentId: 'PE-PS-203',
+                        area: 'SMALL BATCH AREA',
+                        faultType: 'Overvoltage',
+                        severity: 'Medium',
+                        status: 'Acknowledged'
+                    },
+                    {
+                        time: '2026-03-09 12:45:00',
+                        equipmentId: 'PE-PS-274',
+                        area: 'NEW PLATFORM',
+                        faultType: 'Undervoltage',
+                        severity: 'Low',
+                        status: 'Resolved'
+                    },
+                    {
+                        time: '2026-03-09 11:20:00',
+                        equipmentId: 'PE-PS-206',
+                        area: 'MEDIUM BATCH',
+                        faultType: 'Overtemperature',
+                        severity: 'High',
+                        status: 'Active'
+                    },
+                    {
+                        time: '2026-03-09 10:10:00',
+                        equipmentId: 'PE-PS-271',
+                        area: 'NEW PLATFORM',
+                        faultType: 'Communication Loss',
+                        severity: 'Medium',
+                        status: 'Acknowledged'
+                    }
+                ];
+
+                let html = '';
+                faults.forEach(fault => {
+                    html += `
+                        <tr>
+                            <td>${fault.time}</td>
+                            <td><strong>${fault.equipmentId}</strong></td>
+                            <td>${fault.area}</td>
+                            <td>${fault.faultType}</td>
+                        </tr>
+                    `;
+                });
+
+                tbody.innerHTML = html;
+            }
+
+            /**
+             * Render section faults and alarms
+             */
+            renderSectionFaults(section) {
+                const tbody = document.getElementById(`sectionFaultsTableBody-${this.sanitizeId(section.name)}`);
+                if (!tbody) return;
+
+                // Simulated faults for this section
+                const sectionFaults = {
+                    'SMALL BATCH AREA': [
+                        { time: '2026-03-09 14:30:00', equipmentId: 'PE-PS-241', faultType: 'Overcurrent', severity: 'High', status: 'Active' },
+                        { time: '2026-03-09 13:15:00', equipmentId: 'PE-PS-203', faultType: 'Overvoltage', severity: 'Medium', status: 'Acknowledged' }
+                    ],
+                    'NEW PLATFORM': [
+                        { time: '2026-03-09 12:45:00', equipmentId: 'PE-PS-274', faultType: 'Undervoltage', severity: 'Low', status: 'Resolved' },
+                        { time: '2026-03-09 11:20:00', equipmentId: 'PE-PS-271', faultType: 'Communication Loss', severity: 'Medium', status: 'Acknowledged' }
+                    ],
+                    'MEDIUM BATCH': [
+                        { time: '2026-03-09 10:10:00', equipmentId: 'PE-PS-206', faultType: 'Overtemperature', severity: 'High', status: 'Active' }
+                    ],
+                    'OLD PLATFORM': [],
+                    'EE ROOM 1': [],
+                    'EE ROOM 2': [],
+                    'EE ROOM 3': [],
+                    'EE ROOM 4': [],
+                    'PUTTY PLATFORM': [],
+                    'MILLING': []
+                };
+
+                const faults = sectionFaults[section.name] || [];
+
+                let html = '';
+                if (faults.length === 0) {
+                    html = '<tr><td colspan="3" style="text-align: center; color: var(--color-text-secondary);">No faults reported</td></tr>';
+                } else {
+                    faults.forEach(fault => {
+                        html += `
+                            <tr>
+                                <td>${fault.time}</td>
+                                <td><strong>${fault.equipmentId}</strong></td>
+                                <td>${fault.faultType}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                tbody.innerHTML = html;
+            }
+
+            /**
+             * Render interactive map
+             */
+            renderMap() {
+                fetch('map.svg')
+                    .then(response => response.text())
+                    .then(svgText => {
+                        const container = document.getElementById('svgContainer');
+                        container.innerHTML = svgText;
+                        const svg = container.querySelector('svg');
+                        if (!svg) return;
+
+                        // Add event listeners for vfd- and machine- elements
+                        const vfds = svg.querySelectorAll('g[id^="vfd-"]');
+                        const machines = svg.querySelectorAll('g[id^="machine-"]');
+
+                        vfds.forEach(vfd => {
+                            vfd.style.cursor = 'pointer';
+                            vfd.addEventListener('mouseenter', () => this.highlightPair(svg, vfd.id));
+                            vfd.addEventListener('mouseleave', () => this.unhighlightPair(svg, vfd.id));
+                            vfd.addEventListener('click', () => this.showEquipmentModal(vfd.id));
+                        });
+
+                        machines.forEach(machine => {
+                            machine.style.cursor = 'pointer';
+                            machine.addEventListener('mouseenter', () => this.highlightPair(svg, machine.id));
+                            machine.addEventListener('mouseleave', () => this.unhighlightPair(svg, machine.id));
+                            machine.addEventListener('click', () => this.showEquipmentModal(machine.id));
+                        });
+                    })
+                    .catch(error => console.error('Error loading SVG:', error));
+            }
+
+            /**
+             * Highlight paired vfd/machine elements
+             */
+            highlightPair(svg, id) {
+                const baseId = id.replace(/^(vfd|machine)-/, '');
+                const pairId = id.startsWith('vfd-') ? `machine-${baseId}` : `vfd-${baseId}`;
+                const element = svg.querySelector(`#${id}`);
+                const pair = svg.querySelector(`#${pairId}`);
+                // subtle yellow glow
+                const glowVfd = 'drop-shadow(0 0 5px #fbbf24)';
+                const glowmachine = 'drop-shadow(0 0 20px #fbbf24)';
+                if (element) element.style.filter = glowVfd;
+                if (pair) pair.style.filter = glowmachine;
+            }
+
+            /**
+             * Unhighlight paired elements
+             */
+            unhighlightPair(svg, id) {
+                const baseId = id.replace(/^(vfd|machine)-/, '');
+                const pairId = id.startsWith('vfd-') ? `machine-${baseId}` : `vfd-${baseId}`;
+                const element = svg.querySelector(`#${id}`);
+                const pair = svg.querySelector(`#${pairId}`);
+                if (element) element.style.filter = '';
+                if (pair) pair.style.filter = '';
+            }
+
+            /**
+             * Show equipment details modal for clicked element
+             */
+            showEquipmentModal(id) {
+                // Assume vfd-XXX corresponds to PE-PS-XXX
+                const eqId = id.replace('vfd-', 'PE-PS-');
+                let equipment = null;
+                let area = '';
+                this.data.sections.forEach(section => {
+                    const eq = section.equipment.find(e => e.equipment_id === eqId);
+                    if (eq) {
+                        equipment = eq;
+                        area = section.name;
+                    }
+                });
+                if (equipment) {
+                    this.showEquipmentDetails(equipment, area);
+                }
+            }
+
+            /**
              * Export data to CSV
              */
             exportData() {
@@ -3380,6 +3620,19 @@
         // ============================================
 
         const dashboard = new SCADADashboard();
+
+        // Fullscreen change event
+        document.addEventListener('fullscreenchange', () => {
+            const header = document.querySelector('header');
+            const sidebar = document.querySelector('.sidebar');
+            if (document.fullscreenElement) {
+                header.style.display = 'none';
+                sidebar.style.display = 'none';
+            } else {
+                header.style.display = '';
+                sidebar.style.display = '';
+            }
+        });
     </script>
 </body>
 </html>
