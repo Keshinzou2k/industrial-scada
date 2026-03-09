@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -1059,11 +1059,10 @@
 
         .area-cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(clamp(160px, 20%, 220px), 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(clamp(160px, 20%, 220px), 1fr));
             gap: var(--space-lg);
             margin-bottom: var(--space-lg);
             width: 100%;
-            max-width: 100%;
         }
 
         .area-card {
@@ -3116,7 +3115,7 @@
                 if (this.charts[canvasId]) this.charts[canvasId].destroy();
 
                 this.charts[canvasId] = new Chart(canvas, {
-                    type: 'bar',
+                    type: 'pie',
                     data: {
                         labels,
                         datasets: [{
@@ -3138,16 +3137,6 @@
                                     color: '#e2e8f0',
                                     font: { family: "var(--font-main)", size: 11 }
                                 }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                ticks: { color: '#94a3b8' },
-                                grid: { color: '#2d3748' }
-                            },
-                            y: {
-                                ticks: { color: '#94a3b8' },
-                                grid: { color: '#2d3748' }
                             }
                         }
                     }
@@ -3179,7 +3168,7 @@
                 if (this.charts[canvasId]) this.charts[canvasId].destroy();
 
                 this.charts[canvasId] = new Chart(canvas, {
-                    type: 'bar',
+                    type: 'pie',
                     data: {
                         labels,
                         datasets: [{
@@ -3201,17 +3190,6 @@
                                     color: '#e2e8f0',
                                     font: { family: "var(--font-main)", size: 11 }
                                 }
-                            }
-                        },
-                        scales: {
-                            x: {
-                                max: 100,
-                                ticks: { color: '#94a3b8' },
-                                grid: { color: '#2d3748' }
-                            },
-                            y: {
-                                ticks: { color: '#94a3b8' },
-                                grid: { color: '#2d3748' }
                             }
                         }
                     }
