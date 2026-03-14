@@ -252,6 +252,39 @@
             border-left-color: var(--color-primary);
         }
 
+        .sidebar-area-item {
+            align-items: flex-start;
+            gap: 0.45rem;
+        }
+
+        .sidebar-area-item > i {
+            margin-top: 0.1rem;
+            flex-shrink: 0;
+        }
+
+        .sidebar-area-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.05rem;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .sidebar-area-name {
+            white-space: normal;
+            overflow-wrap: break-word;
+            word-break: normal;
+            line-height: 1.2;
+        }
+
+        .sidebar-area-count {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--color-text-secondary);
+            line-height: 1.15;
+            white-space: normal;
+        }
+
         
 
         .sidebar-controls {
@@ -820,7 +853,7 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            min-width: 0;
+            min-width: 1100px;
         }
 
         #areaPerformanceTable th,
@@ -839,21 +872,51 @@
 
         #areaPerformanceTable th:nth-child(1),
         #areaPerformanceTable td:nth-child(1) {
-            width: 16%;
+            width: 17%;
         }
 
         #areaPerformanceTable th:nth-child(2),
         #areaPerformanceTable td:nth-child(2) {
-            width: 22%;
+            width: 17%;
         }
 
         #areaPerformanceTable th:nth-child(3),
         #areaPerformanceTable td:nth-child(3) {
-            width: 14%;
+            width: 10%;
         }
 
-        #areaPerformanceTable th:nth-child(n+4),
-        #areaPerformanceTable td:nth-child(n+4) {
+        #areaPerformanceTable th:nth-child(4),
+        #areaPerformanceTable td:nth-child(4) {
+            width: 8%;
+        }
+
+        #areaPerformanceTable th:nth-child(5),
+        #areaPerformanceTable td:nth-child(5) {
+            width: 11%;
+        }
+
+        #areaPerformanceTable th:nth-child(6),
+        #areaPerformanceTable td:nth-child(6) {
+            width: 11%;
+        }
+
+        #areaPerformanceTable th:nth-child(7),
+        #areaPerformanceTable td:nth-child(7) {
+            width: 7%;
+        }
+
+        #areaPerformanceTable th:nth-child(8),
+        #areaPerformanceTable td:nth-child(8) {
+            width: 7%;
+        }
+
+        #areaPerformanceTable th:nth-child(9),
+        #areaPerformanceTable td:nth-child(9) {
+            width: 6%;
+        }
+
+        #areaPerformanceTable th:nth-child(10),
+        #areaPerformanceTable td:nth-child(10) {
             width: 6%;
         }
 
@@ -861,6 +924,17 @@
             white-space: normal;
             overflow-wrap: anywhere;
             font-weight: 600;
+            transition: color 0.2s ease, text-shadow 0.2s ease, filter 0.2s ease;
+        }
+
+        .area-name-cell[title] {
+            cursor: help;
+        }
+
+        .area-name-cell[title]:hover {
+            color: #7dd3fc;
+            text-shadow: 0 0 8px rgba(14, 165, 233, 0.65), 0 0 16px rgba(56, 189, 248, 0.35);
+            filter: brightness(1.05);
         }
 
         #areaPerformanceTable .status-summary {
@@ -872,18 +946,24 @@
         #areaPerformanceTable .status-pill {
             font-size: 0.66rem;
             padding: 0.1rem 0.24rem;
+            white-space: nowrap;
+            overflow-wrap: normal;
+            word-break: normal;
         }
 
         #areaPerformanceTable th {
             background-color: var(--color-surface);
             font-weight: 600;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-size: 0.76rem;
+            text-transform: none;
+            letter-spacing: 0.02em;
             color: var(--color-text-secondary);
             position: sticky;
             top: 0;
             z-index: 10;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .area-summary-table-row {
@@ -1163,6 +1243,9 @@
             border-radius: 0.25rem;
             font-size: 0.75rem;
             font-weight: 500;
+            white-space: nowrap;
+            overflow-wrap: normal;
+            word-break: normal;
         }
 
         .status-pill.online {
@@ -3386,10 +3469,9 @@
         /* Disable horizontal swipe and keep content visible via wrapping. */
         #areaPerformanceTable {
             table-layout: fixed;
-            min-width: 0;
+            min-width: 1100px;
         }
 
-        #areaPerformanceTable th,
         #areaPerformanceTable td,
         .area-name-cell,
         .equipment-names-cell,
@@ -3397,13 +3479,33 @@
         #page-equipment td,
         #page-equipment .equipment-name-cell,
         #page-equipment .downtime-cell,
-        .status-pill,
-        .tag,
         .sidebar-item {
             white-space: normal !important;
-            overflow-wrap: anywhere !important;
-            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            word-break: normal !important;
             text-overflow: unset !important;
+        }
+
+        #areaPerformanceTable th {
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
+
+        .status-pill,
+        .tag,
+        .downtime-total,
+        .sidebar-item {
+            white-space: nowrap !important;
+            overflow-wrap: normal !important;
+            word-break: normal !important;
+        }
+
+        .sidebar-area-item,
+        .sidebar-area-item * {
+            white-space: normal !important;
+            overflow-wrap: break-word !important;
+            word-break: normal !important;
         }
 
         #page-equipment .table-container,
@@ -3431,8 +3533,8 @@
             white-space: normal !important;
             overflow: visible !important;
             text-overflow: unset !important;
-            overflow-wrap: anywhere !important;
-            word-break: break-word !important;
+            overflow-wrap: break-word !important;
+            word-break: normal !important;
         }
 
         .chart-title {
@@ -3443,6 +3545,40 @@
 
         .chart-title .title-label {
             white-space: normal;
+        }
+
+        @media (min-width: 1025px) and (max-width: 1536px) {
+            #areaPerformanceTable th,
+            #areaPerformanceTable td,
+            #page-equipment th,
+            #page-equipment td {
+                font-size: 0.74rem;
+                padding: 0.32rem 0.42rem;
+            }
+
+            #areaPerformanceTable th {
+                letter-spacing: 0.01em;
+            }
+
+            #areaPerformanceTable .status-pill,
+            .status-pill {
+                font-size: 0.64rem;
+                padding: 0.1rem 0.24rem;
+            }
+        }
+
+        @media (min-width: 1920px) {
+            #areaPerformanceTable th,
+            #areaPerformanceTable td,
+            #page-equipment th,
+            #page-equipment td {
+                font-size: 0.84rem;
+            }
+
+            #areaPerformanceTable .status-pill,
+            .status-pill {
+                font-size: 0.72rem;
+            }
         }
     </style>
 </head>
@@ -3536,11 +3672,10 @@
                             <thead>
                                 <tr>
                                     <th>Area</th>
-                                    <th>Equipment</th>
                                     <th>Status</th>
-                                    <th>Running Time (Max)</th>
+                                    <th>Running Time</th>
                                     <th>Utilization</th>
-                                    <th>Power Cons.</th>
+                                    <th>Power Consumption</th>
                                     <th>Peak Demand</th>
                                     <th>Current</th>
                                     <th>Voltage</th>
@@ -4190,10 +4325,12 @@
                 let html = '<div class="sidebar-title">Areas</div>';
                 this.data.sections.forEach(section => {
                     html += `
-                        <div class="sidebar-item" data-page="section" data-section="${section.name}">
+                        <div class="sidebar-item sidebar-area-item" data-page="section" data-section="${section.name}" title="${section.name} - ${section.total_vfds} VFDs">
                             <i class="fas fa-map-pin"></i>
-                            <span>${section.name}</span>
-                            <span style="margin-left: auto; font-size: 0.75rem; color: var(--color-text-secondary);">${section.total_vfds}</span>
+                            <div class="sidebar-area-content">
+                                <span class="sidebar-area-name">${section.name}</span>
+                                <span class="sidebar-area-count">${section.total_vfds} VFDs</span>
+                            </div>
                         </div>
                     `;
                 });
@@ -4907,10 +5044,14 @@
                 let delay = 0;
                 this.data.sections.forEach(section => {
                     const data = performanceData[section.name];
+                    const equipmentTooltip = data.equipmentNames
+                        .replace(/&/g, '&amp;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
                     html += `
                         <tr class="area-summary-table-row" style="animation-delay: ${delay}s;">
-                            <td class="area-name-cell">${section.name}</td>
-                            <td class="equipment-names-cell" title="${data.equipmentNames}">${data.equipmentNames.length > 50 ? data.equipmentNames.substring(0, 50) + '...' : data.equipmentNames}</td>
+                            <td class="area-name-cell" title="Equipment: ${equipmentTooltip}">${section.name}</td>
                             <td class="status-cell">
                                 <div class="status-summary">
                                     <span class="status-pill online">${data.status.online} Online</span>
@@ -5199,22 +5340,7 @@
                             borderWidth: 2
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    color: '#e2e8f0',
-                                    font: { family: "var(--font-main)", size: 11 }
-                                }
-                            },
-                            tooltip: {
-                                bodyFont: { family: "var(--font-main)" }
-                            }
-                        }
-                    }
+                    options: this.getPieChartOptions()
                 });
             }
 
@@ -5228,6 +5354,29 @@
                     colors.push(palette[i % palette.length]);
                 }
                 return colors;
+            }
+
+            getPieChartOptions() {
+                return {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            align: 'start',
+                            labels: {
+                                color: '#e2e8f0',
+                                boxWidth: 28,
+                                boxHeight: 10,
+                                padding: 10,
+                                font: { family: 'var(--font-main)', size: 10 }
+                            }
+                        },
+                        tooltip: {
+                            bodyFont: { family: 'var(--font-main)' }
+                        }
+                    }
+                };
             }
 
             /**
@@ -5410,22 +5559,7 @@
                             borderRadius: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    color: '#e2e8f0',
-                                    font: { family: "var(--font-main)", size: 11 }
-                                }
-                            },
-                            tooltip: {
-                                bodyFont: { family: "var(--font-main)" }
-                            }
-                        }
-                    }
+                    options: this.getPieChartOptions()
                 });
             }
 
@@ -5463,22 +5597,7 @@
                             borderRadius: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    color: '#e2e8f0',
-                                    font: { family: "var(--font-main)", size: 11 }
-                                }
-                            },
-                            tooltip: {
-                                bodyFont: { family: "var(--font-main)" }
-                            }
-                        }
-                    }
+                    options: this.getPieChartOptions()
                 });
             }
 
@@ -5514,22 +5633,7 @@
                             borderRadius: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    color: '#e2e8f0',
-                                    font: { family: "var(--font-main)", size: 11 }
-                                }
-                            },
-                            tooltip: {
-                                bodyFont: { family: "var(--font-main)" }
-                            }
-                        }
-                    }
+                    options: this.getPieChartOptions()
                 });
             }
 
@@ -5565,22 +5669,7 @@
                             borderRadius: 4
                         }]
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    color: '#e2e8f0',
-                                    font: { family: "var(--font-main)", size: 11 }
-                                }
-                            },
-                            tooltip: {
-                                bodyFont: { family: "var(--font-main)" }
-                            }
-                        }
-                    }
+                    options: this.getPieChartOptions()
                 });
             }
 
@@ -6631,31 +6720,55 @@
                             return;
                         }
 
-                        // Add event listeners for vfd- and machine- elements
-                        const vfds = svg.querySelectorAll('g[id^="vfd-"]');
+                        // Add event listeners for vfd and machine elements.
+                        // Use class-based vfd selector because some SVG nodes use inkscape labels
+                        // or duplicate/missing IDs.
+                        const vfds = svg.querySelectorAll('g.vfd');
                         const machines = svg.querySelectorAll('g[id^="machine-"]');
 
-                        vfds.forEach(vfd => {
+                        vfds.forEach((vfd, index) => {
+                            const equipmentId = this.extractEquipmentIdFromVfdElement(vfd);
+                            if (equipmentId) {
+                                vfd.dataset.equipmentId = equipmentId;
+                                const eqBase = equipmentId.match(/-(\d+)$/)?.[1];
+                                if (eqBase) vfd.dataset.baseId = eqBase;
+                            }
+
+                            const idBase = vfd.id?.match(/^vfd-(\d+)$/)?.[1]
+                                || vfd.getAttribute('inkscape:label')?.match(/^vfd-(\d+)$/)?.[1]
+                                || vfd.dataset.baseId;
+
+                            if (idBase && !vfd.dataset.baseId) {
+                                vfd.dataset.baseId = idBase;
+                            }
+
+                            if (!vfd.id) {
+                                const safeBase = vfd.dataset.baseId || `unknown-${index}`;
+                                vfd.id = `vfd-node-${safeBase}-${index}`;
+                            }
+
                             vfd.style.cursor = 'pointer';
                             vfd.style.display = this.vfdVisible ? 'block' : 'none';
                             vfd.addEventListener('mouseenter', (e) => {
-                                this.highlightPair(svg, vfd.id);
-                                this.showVFDTooltip(e, vfd.id);
+                                this.highlightPair(svg, vfd);
+                                this.showVFDTooltip(e, vfd);
                             });
                             vfd.addEventListener('mouseleave', () => {
-                                this.unhighlightPair(svg, vfd.id);
+                                this.unhighlightPair(svg, vfd);
                                 this.hideVFDTooltip();
                             });
                             vfd.addEventListener('mousemove', (e) => this.updateTooltipPosition(e));
-                            vfd.addEventListener('click', () => this.showEquipmentModal(vfd.id));
+                            vfd.addEventListener('click', () => this.showEquipmentModal(vfd));
                         });
 
                         machines.forEach(machine => {
+                            const machineBase = machine.id?.match(/^machine-(\d+)$/)?.[1];
+                            if (machineBase) machine.dataset.baseId = machineBase;
                             machine.style.cursor = 'pointer';
                             machine.style.display = this.machineVisible ? 'block' : 'none';
-                            machine.addEventListener('mouseenter', () => this.highlightPair(svg, machine.id));
-                            machine.addEventListener('mouseleave', () => this.unhighlightPair(svg, machine.id));
-                            machine.addEventListener('click', () => this.showEquipmentModal(machine.id));
+                            machine.addEventListener('mouseenter', () => this.highlightPair(svg, machine));
+                            machine.addEventListener('mouseleave', () => this.unhighlightPair(svg, machine));
+                            machine.addEventListener('click', () => this.showEquipmentModal(machine));
                         });
                         
                         console.log('Map loaded successfully');
@@ -6708,13 +6821,22 @@
             /**
              * Highlight paired vfd/machine elements
              */
-            highlightPair(svg, id) {
-                const baseId = id.replace(/^(vfd|machine)-/, '');
-                const pairId = id.startsWith('vfd-') ? `machine-${baseId}` : `vfd-${baseId}`;
-                const element = svg.querySelector(`#${id}`);
-                const pair = svg.querySelector(`#${pairId}`);
-                var shadowThickness1 = (id.startsWith('vfd-')) ? 10 : 30;
-                var shadowThickness2 = (id.startsWith('vfd-')) ? 30 : 10;
+            highlightPair(svg, mapTarget) {
+                const element = typeof mapTarget === 'string'
+                    ? svg.querySelector(`#${mapTarget}`)
+                    : mapTarget;
+                if (!element) return;
+
+                const isVfd = element.classList.contains('vfd') || String(element.id || '').startsWith('vfd-');
+                const baseId = element.dataset.baseId || String(element.id || '').replace(/^(vfd|machine)-/, '');
+                if (!baseId) return;
+
+                const pair = isVfd
+                    ? svg.querySelector(`#machine-${baseId}`)
+                    : (svg.querySelector(`g.vfd[data-base-id="${baseId}"]`) || svg.querySelector(`#vfd-${baseId}`));
+
+                const shadowThickness1 = isVfd ? 10 : 30;
+                const shadowThickness2 = isVfd ? 30 : 10;
                 if (element) element.style.filter = 'drop-shadow(0 0 ' + shadowThickness1 + 'px red)';
                 if (pair) pair.style.filter = 'drop-shadow(0 0 ' + shadowThickness2 + 'px red)';
             }
@@ -6722,11 +6844,19 @@
             /**
              * Unhighlight paired elements
              */
-            unhighlightPair(svg, id) {
-                const baseId = id.replace(/^(vfd|machine)-/, '');
-                const pairId = id.startsWith('vfd-') ? `machine-${baseId}` : `vfd-${baseId}`;
-                const element = svg.querySelector(`#${id}`);
-                const pair = svg.querySelector(`#${pairId}`);
+            unhighlightPair(svg, mapTarget) {
+                const element = typeof mapTarget === 'string'
+                    ? svg.querySelector(`#${mapTarget}`)
+                    : mapTarget;
+                if (!element) return;
+
+                const isVfd = element.classList.contains('vfd') || String(element.id || '').startsWith('vfd-');
+                const baseId = element.dataset.baseId || String(element.id || '').replace(/^(vfd|machine)-/, '');
+                const pair = baseId
+                    ? (isVfd
+                        ? svg.querySelector(`#machine-${baseId}`)
+                        : (svg.querySelector(`g.vfd[data-base-id="${baseId}"]`) || svg.querySelector(`#vfd-${baseId}`)))
+                    : null;
                 if (element) element.style.filter = '';
                 if (pair) pair.style.filter = '';
             }
@@ -6734,17 +6864,8 @@
             /**
              * Show tooltip with live VFD data
              */
-            showVFDTooltip(event, vfdId) {
-                const eqId = vfdId.replace('vfd-', 'PE-PS-');
-                let equipment = null;
-                let area = '';
-                this.data.sections.forEach(section => {
-                    const eq = section.equipment.find(e => e.equipment_id === eqId);
-                    if (eq) {
-                        equipment = eq;
-                        area = section.name;
-                    }
-                });
+            showVFDTooltip(event, vfdTarget) {
+                const { equipment, area } = this.resolveEquipmentFromMapTarget(vfdTarget);
 
                 if (!equipment) return;
 
@@ -6849,21 +6970,72 @@
             /**
              * Show equipment details modal for clicked element
              */
-            showEquipmentModal(id) {
-                // Assume vfd-XXX corresponds to PE-PS-XXX
-                const eqId = id.replace('vfd-', 'PE-PS-');
-                let equipment = null;
-                let area = '';
-                this.data.sections.forEach(section => {
-                    const eq = section.equipment.find(e => e.equipment_id === eqId);
-                    if (eq) {
-                        equipment = eq;
-                        area = section.name;
-                    }
-                });
+            showEquipmentModal(mapTarget) {
+                const { equipment, area } = this.resolveEquipmentFromMapTarget(mapTarget);
                 if (equipment) {
                     this.showEquipmentDetails(equipment, area);
                 }
+            }
+
+            extractEquipmentIdFromVfdElement(vfdElement) {
+                if (!vfdElement || typeof vfdElement.querySelectorAll !== 'function') return null;
+
+                const candidates = vfdElement.querySelectorAll('tspan, text');
+                for (const node of candidates) {
+                    const text = (node.textContent || '').trim();
+                    const match = text.match(/\b[A-Z]{2}-[A-Z]{2}-\d+\b/i);
+                    if (match) {
+                        return match[0].toUpperCase();
+                    }
+                }
+
+                return null;
+            }
+
+            findEquipmentById(equipmentId) {
+                if (!equipmentId || !this.data?.sections) {
+                    return { equipment: null, area: '' };
+                }
+
+                for (const section of this.data.sections) {
+                    const equipment = section.equipment.find(eq => eq.equipment_id === equipmentId);
+                    if (equipment) {
+                        return { equipment, area: section.name };
+                    }
+                }
+
+                return { equipment: null, area: '' };
+            }
+
+            resolveEquipmentFromMapTarget(mapTarget) {
+                const svg = document.querySelector('#svgContainer svg');
+                const element = typeof mapTarget === 'string'
+                    ? (svg?.querySelector(`#${mapTarget}`) || null)
+                    : mapTarget;
+
+                if (!element) {
+                    return { equipment: null, area: '' };
+                }
+
+                let equipmentId = element.dataset?.equipmentId || null;
+                const isVfd = element.classList.contains('vfd') || String(element.id || '').startsWith('vfd-');
+
+                if (!equipmentId && isVfd) {
+                    equipmentId = this.extractEquipmentIdFromVfdElement(element);
+                }
+
+                const baseId = element.dataset?.baseId || String(element.id || '').replace(/^(vfd|machine)-/, '');
+
+                if (!equipmentId && !isVfd && baseId && svg) {
+                    const pairedVfd = svg.querySelector(`g.vfd[data-base-id="${baseId}"]`) || svg.querySelector(`#vfd-${baseId}`);
+                    equipmentId = pairedVfd ? (pairedVfd.dataset?.equipmentId || this.extractEquipmentIdFromVfdElement(pairedVfd)) : null;
+                }
+
+                if (!equipmentId && baseId) {
+                    equipmentId = `PE-PS-${baseId}`;
+                }
+
+                return this.findEquipmentById(equipmentId);
             }
 
             /**
