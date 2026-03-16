@@ -4412,6 +4412,12 @@
                 const section = this.data.sections.find(s => s.name === sectionName);
                 if (!section) return;
 
+                // Always clear map layout mode when navigating to a section page.
+                const mainContent = document.getElementById('mainContent');
+                if (mainContent) {
+                    mainContent.classList.remove('map-active');
+                }
+
                 // Animate out all existing pages
                 const pages = document.querySelectorAll('.page');
                 pages.forEach(page => {
@@ -7085,12 +7091,28 @@
         document.addEventListener('fullscreenchange', () => {
             const header = document.querySelector('header');
             const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const mapPage = document.getElementById('page-map');
+            const isMapVisible = mapPage && window.getComputedStyle(mapPage).display !== 'none';
+
             if (document.fullscreenElement) {
                 header.style.display = 'none';
                 sidebar.style.display = 'none';
             } else {
                 header.style.display = '';
                 sidebar.style.display = '';
+
+                // Ensure scrolling is restored after exiting fullscreen.
+                document.body.style.overflow = '';
+                document.documentElement.style.overflow = '';
+
+                if (mainContent) {
+                    if (isMapVisible) {
+                        mainContent.classList.add('map-active');
+                    } else {
+                        mainContent.classList.remove('map-active');
+                    }
+                }
             }
         });
     </script>
